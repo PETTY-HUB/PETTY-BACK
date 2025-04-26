@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PETTY Q&A 게시판</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+        .badge[data-type="강아지"] { background: #4dabf7; }   /* 파란색 */
+        .badge[data-type="고양이"] { background: #69db7c; }   /* 연두색 */
+        .badge[data-type="햄스터"] { background: #b197fc; }   /* 보라색 */
+        .badge[data-type="앵무새"] { background: #ff8787; }   /* 분홍색 */
+        .badge[data-type="기타"] { background: #ffa94d; }     /* 주황색 */
+        .badge[data-type="토끼"] { background: #ffd43b; }     /* 노란색 */
+        .badge[data-type="파충류"] { background: #63e6be; }   /* 민트색 */
+
+        .card h3 {
+            margin: 8px 0 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .card p.content {
+            font-size: 0.9rem;
+            color: #555;
+            margin: 0 0 10px 0;
+        }
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: auto;
+        }
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+<h1>궁금해요! 질문답변</h1>
+<div style="text-align: right; margin-bottom: 20px;">
+    <a href="/posts/qna/new">
+        <button style="padding: 8px 16px; font-size: 0.9rem; background-color: #ffc107; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            ✍️ 글쓰기
+        </button>
+    </a>
+</div>
+<div class="grid" id="qnaList"></div>
+<div class="pagination" id="pagination" style="margin-top: 20px;"></div>
+
+<script>
+    let currentPage = 0;
+    const pageSize = 9;
+
+    async function fetchQnaPosts() {
+        const res = await fetch(`/api/posts?type=QNA&page=${currentPage}&size=${pageSize}`);
+        const page = await res.json();
+        const posts = page.content;
+
+        const list = document.getElementById('qnaList');
+        list.innerHTML = '';
+
+        posts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const badge = document.createElement('div');
+            badge.className = 'badge';
+            badge.dataset.type = post.petType;
+            badge.textContent = post.petType;
+            card.appendChild(badge);
+
+            card.innerHTML += `
+                <h3><a href="/posts/detail?id=${post.id}">${post.title}</a></h3>
+                <p class="content">${post.isResolved ? '[해결됨] ' : ''}질문 내용을 확인하려면 클릭하세요.</p>
+                <div class="meta">
+                    <span>👤 ${post.writer}</span>
+                    <span>❤️ ${post.likeCount || 0}</span>
+                    <span>💬 ${post.commentCount}</span>
+                    <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+                </div>
+            `;
+
+            list.appendChild(card);
+        });
+
+        renderPagination(page.totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        for (let i = 0; i < totalPages; i++) {
+            const button = document.createElement('button');
+            button.textContent = i + 1;
+            button.disabled = i === currentPage;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                fetchQnaPosts();
+            });
+            pagination.appendChild(button);
+        }
+    }
+
+    fetchQnaPosts();
+</script>
+</body>
+</html>
