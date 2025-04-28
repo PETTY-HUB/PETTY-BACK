@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>PETTY 게시글 상세</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f9f9f9;
+          padding: 20px;
+        }
+        .meta {
+          font-size: 0.9rem;
+          color: #555;
+          margin: 10px 0;
+          display: flex;
+          gap: 12px;
+        }
+        .badge {
+          display: inline-block;
+          background-color: #ffc107;
+          color: #fff;
+          font-size: 0.75rem;
+          padding: 4px 8px;
+          border-radius: 4px;
+          margin-bottom: 8px;
+        }
+        .action-buttons {
+          margin-top: 20px;
+        }
+        .comment-box {
+          margin-top: 40px;
+        }
+        .comment {
+          background: #fff;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 6px;
+          box-shadow: 0 0 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+          width: 100%;
+          padding: 8px;
+          margin-top: 10px;
+        }
+        button {
+          margin-top: 8px;
+          padding: 6px 12px;
+          background-color: #ffc107;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          color: white;
+        }
+        img {
+          max-width: 100%;
+          border-radius: 6px;
+          margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<main>
+    <div id="postDetail">로딩 중...</div>
+</main>
+
+<!-- ✅ 유미님의 전체 JS 코드 -->
+<script>
+    const postId = new URLSearchParams(location.search).get("id");
+
+    async function fetchPostDetail() {
+      try {
+        const res = await fetch(`/api/posts/${postId}`);
+        if (!res.ok) throw new Error("게시글 조회 실패");
+
+        const post = await res.json();
+        const container = document.getElementById("postDetail");
+        const isLoggedIn = !!localStorage.getItem("jwt");
+        const imageHtml = Array.isArray(post.images) && post.images.length > 0
+          ? post.images
+              .sort((a, b) => a.ordering - b.ordering)  // 순서 보장
+              .map(img => `<img src="${img.imageUrl}" alt="이미지">`)
+              .join('')
+          : '';
+
+          const likeButtonHtml = isLoggedIn
+            ? `<button id="likeBtn">❤️ 좋아요</button>`
+            : '';
+
+        container.innerHTML = `
+          <div class="badge">${post.petType || ''}</div>
+          <h1>${post.title}</h1>
+          <div class="meta">
+            <span>👤 ${post.writer}</span>
+            <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+            <span id="likeCount">❤️ ${post.likeCount || 0}</span>
+            <span>💬 ${post.commentCount}</span>
+          </div>
+          ${likeButtonHtml}
+          ${imageHtml}
+          <p>${post.content?.replaceAll('\n', '<br>')}</p>
+          ${post.region ? `<p><strong>여행 장소:</strong> ${post.region}</p>` : ''}
+          ${post.petName ? `<p><strong>반려동물 이름:</strong> ${post.petName}</p>` : ''}
+          ${post.postType === "QNA" ? `<p><strong>질문 상태:</strong> ${post.isResolved ? '해결됨' : '미해결'}</p>` : ''}
+          ${isLoggedIn ? `
+          <div class="action-buttons">
+            <button onclick="goToEditPage('${post.postType}', ${postId})">✏️ 수정</button>
+            <button onclick="deletePost()">🗑 삭제</button>
+          </div>` : ''}
+          <div class="comment-box">
+            <h3>댓글</h3>
+            <div id="commentList"></div>
+            <form id="commentForm">
+              <textarea id="commentContent" placeholder="댓글을 입력해주세요" required></textarea>
+              <button type="submit">등록</button>
+            </form>
+          </div>
+        `;
+
+        if (isLoggedIn) {
+        const likeBtn = document.getElementById("likeBtn");
+        likeBtn?.addEventListener("click", async () => {
+          try {
+            const res = await fetch(`/api/posts/${postId}/like`, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+              }
+            });
+
+            if (!res.ok) throw new Error("좋아요 실패");
+
+            const result = await res.json();
+            document.getElementById("likeCount").innerText = `❤️ ${result.likeCount}`;
+          } catch (err) {
+            alert("좋아요 처리에 실패했습니다.");
+            console.error(err);
+          }
+        });
+      }
+
+        bindCommentForm();
+        await loadComments();
+      } catch (err) {
+        console.error(err);
+        alert("게시글을 불러오는 데 실패했습니다.");
+      }
+    }
+
+    function goToEditPage(postType, postId) {
+      const lowerType = postType.toLowerCase(); // QNA → qna
+      location.href = `/posts/${lowerType}/edit?id=${postId}`;
+    }
+
+    function bindCommentForm() {
+      const form = document.getElementById("commentForm");
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const content = document.getElementById("commentContent").value;
+
+        try {
+          const res = await fetch(`/api/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+            },
+            body: JSON.stringify({ content })
+          });
+
+          if (!res.ok) throw new Error("댓글 등록 실패");
+
+          document.getElementById("commentContent").value = "";
+          loadComments();
+        } catch (err) {
+          alert("댓글 등록에 실패했습니다. 로그인 상태를 확인해주세요.");
+        }
+      });
+    }
+
+    async function loadComments() {
+      try {
+        const res = await fetch(`/api/posts/${postId}/comments`);
+        if (!res.ok) throw new Error("댓글 불러오기 실패");
+
+        const comments = await res.json();
+        if (!Array.isArray(comments)) return;
+
+        const commentList = document.getElementById("commentList");
+        commentList.innerHTML = "";
+
+        comments.forEach(comment => {
+          const div = document.createElement("div");
+          div.className = "comment";
+          div.innerHTML = `
+            <p><strong>${comment.writer}</strong> · ${new Date(comment.createdAt).toLocaleString()}</p>
+            <p id="content-${comment.id}">${comment.content}</p>
+            ${localStorage.getItem("jwt") ? `
+              <button onclick="editComment(${comment.id}, '${comment.content.replace(/'/g, "\\'")}')">수정</button>
+              <button onclick="deleteComment(${comment.id})">삭제</button>` : ''}
+          `;
+          commentList.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function editComment(commentId, oldContent) {
+      const contentElement = document.getElementById(`content-${commentId}`);
+      contentElement.innerHTML = `
+        <textarea id="edit-input-${commentId}" rows="2">${oldContent}</textarea>
+        <button onclick="submitEdit(${commentId})">완료</button>
+        <button onclick="loadComments()">취소</button>
+      `;
+
+      // ✅ commentDiv 내부의 기존 수정/삭제 버튼 숨기기
+      const commentDiv = contentElement.closest(".comment");
+      const buttons = commentDiv.querySelectorAll("button");
+      buttons.forEach(btn => {
+        const text = btn.textContent.trim();
+        if (text === "수정" || text === "삭제") {
+          btn.style.display = "none";
+        }
+      });
+    }
+
+
+    async function submitEdit(commentId) {
+      const newContent = document.getElementById(`edit-input-${commentId}`).value;
+
+      if (!newContent) {
+        alert("댓글 내용을 입력해주세요.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/comments/${commentId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+          },
+          body: JSON.stringify({ content: newContent })
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("❌ 수정 실패 응답:", text);
+          alert("수정 실패. 본인 댓글만 수정할 수 있습니다.");
+          return;
+        }
+
+        console.log("✅ 수정 완료, 내용:", newContent);
+
+        await loadComments();
+      } catch (err) {
+        alert("댓글 수정 중 오류 발생");
+      }
+    }
+
+    async function deletePost() {
+      if (!confirm("이 게시글을 삭제하시겠습니까?")) return;
+
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+        }
+      });
+
+      if (res.ok) {
+        alert("게시글이 삭제되었습니다.");
+        location.href = "/";
+      } else {
+        alert("삭제 실패. 권한이 없습니다.");
+      }
+    }
+
+    async function deleteComment(commentId) {
+      if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+        }
+      });
+
+      if (res.ok) {
+        loadComments();
+      } else {
+        alert("삭제 실패. 본인 댓글만 삭제할 수 있습니다.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await fetchPostDetail();
+      await loadComments();
+    });
+</script>
+
+</body>
+</html>

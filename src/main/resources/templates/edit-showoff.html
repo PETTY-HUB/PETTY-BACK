@@ -1,0 +1,124 @@
+<!-- 📄 edit-showoff.html, 자랑글 수정 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>자랑글 수정</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f9f9f9;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          max-width: 600px;
+          margin: 40px auto;
+          background: white;
+          padding: 30px;
+          border-radius: 16px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+          font-size: 1.4rem;
+          margin-bottom: 25px;
+        }
+        label {
+          font-weight: bold;
+          display: block;
+          margin-top: 20px;
+        }
+        input[type="text"],
+        textarea,
+        select {
+          width: 100%;
+          padding: 12px;
+          margin-top: 6px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          box-sizing: border-box;
+          font-size: 1rem;
+        }
+        textarea {
+          height: 160px;
+        }
+        .upload-box {
+          margin-top: 20px;
+          padding: 20px;
+          border: 2px dashed #ccc;
+          text-align: center;
+          border-radius: 12px;
+          background-color: #fafafa;
+          color: #777;
+        }
+        .upload-box input[type="file"] {
+          display: none;
+        }
+        .upload-box label {
+          display: inline-block;
+          margin-top: 10px;
+          padding: 8px 20px;
+          background-color: #eee;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .actions {
+          margin-top: 30px;
+          text-align: right;
+        }
+        .actions button {
+          padding: 10px 18px;
+          margin-left: 10px;
+          font-size: 1rem;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .cancel {
+          background-color: #f0f0f0;
+        }
+        .submit {
+          background-color: #ffc107;
+          color: #fff;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>자랑글 수정하기</h2>
+    <form id="postForm">
+        <label for="title">제목</label>
+        <input type="text" id="title" maxlength="50" placeholder="제목을 입력해주세요">
+
+        <label for="petType">반려동물 카테고리</label>
+        <select id="petType">
+            <option value="">카테고리를 선택해주세요</option>
+            <option value="DOG">강아지</option>
+            <option value="CAT">고양이</option>
+            <option value="RABBIT">토끼</option>
+            <option value="HAMSTER">햄스터</option>
+            <option value="PARROT">앵무새</option>
+            <option value="REPTILE">파충류</option>
+            <option value="OTHER">기타</option>
+        </select>
+
+        <label for="content">내용</label>
+        <textarea id="content" maxlength="2000" placeholder="자랑하고 싶은 내용을 자유롭게 작성해주세요. (최대 2000자)"></textarea>
+
+        <label for="imageFiles">이미지 첨부</label>
+        <div class="upload-box">
+            <p>🖼 이미지를 여기에 드래그하거나</p>
+            <label for="imageFiles">파일 선택하기</label>
+            <input type="file" id="imageFiles" multiple accept="image/*">
+            <div id="imagePreview"></div>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="cancel" onclick="history.back()">취소</button>
+            <button type="submit" class="submit">수정하기</button>
+        </div>
+    </form>
+</div>
+<script src="/js/common/edit-showoff.js"></script>
+</body>
+</html>
