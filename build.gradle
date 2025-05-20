@@ -19,6 +19,10 @@ configurations {
 	}
 }
 
+configurations.all {
+	exclude group: 'commons-logging', module: 'commons-logging'
+} //추가(yum): Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
 repositories {
 	mavenCentral()
 	// SpringAI 관련 maven 설정
@@ -31,7 +35,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -54,7 +58,7 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	// Adds JTS Core and Hibernate Spatial for handling spatial data types and queries
+	// Adds JTS Core and Hibernate Spatial for handling spatial data types and queries //추가(yum) Info: [petty] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface io.github.petty.community.repository.CommentRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
 	implementation 'org.locationtech.jts:jts-core:1.20.0'
 	implementation 'org.hibernate.orm:hibernate-spatial:6.6.13.Final'
 

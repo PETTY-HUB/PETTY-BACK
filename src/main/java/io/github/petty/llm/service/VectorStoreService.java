@@ -1,6 +1,6 @@
 package io.github.petty.llm.service;
 
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import io.github.petty.tour.entity.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@lombok.extern.slf4j.Slf4j
 @Slf4j
 @Service
 @RequiredArgsConstructor

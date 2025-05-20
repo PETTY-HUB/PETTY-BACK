@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🐶 PETTY </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fdf7e4;
+            color: #333;
+            padding: 20px;
+        }
+        .nav {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .nav a {
+            color: #f39c12;
+            text-decoration: none;
+            margin-right: 15px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .nav a:hover {
+            background-color: #f1c40f;
+            color: white;
+        }
+        .auth-menu {
+            float: right;
+        }
+        .user-info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .user-info h2 {
+            color: #f39c12;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+<h1 th:text="${message}">PETTY에 오신 것을 환영합니다</h1>
+<h3 th:text="${error}">회원가입 에러 확인용</h3>
+
+<div>
+    <form method="get" action="/vision/upload">
+        <button type="submit">이미지 업로드하러 가기</button>
+    </form>
+</div>
+
+<div class="nav">
+    <a href="/">홈</a>
+    <div class="auth-menu">
+        <span id="loginMenu" style="display: none;">
+            <a href="/login">로그인</a>
+            <a href="/join">회원가입</a>
+        </span>
+        <span id="userMenu" style="display: none;">
+            <a onclick="goToProfileEdit()">프로필 수정</a>
+            <a onclick="logout(event)">로그아웃</a>
+        </span>
+    </div>
+</div>
+
+<h2 th:text="${message}">index message</h2>
+
+<div class="user-info" id="userInfo" style="display: none;">
+    <h2>사용자 정보</h2>
+    <p>이름: <span id="username"></span></p>
+    <p>권한: <span id="role"></span></p>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', async function() {
+        await checkLoginStatus();
+    });
+
+    async function checkLoginStatus() {
+        try {
+            const response = await fetch('/api/users/me'); // 쿠키는 자동으로 전송
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('userMenu').style.display = 'inline';
+                document.getElementById('loginMenu').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('role').textContent = data.role;
+            } else {
+                showLoginMenu();
+                if (response.status === 401) {
+                    // 쿠키가 만료되었거나 유효하지 않은 경우
+                }
+            }
+        } catch (error) {
+            console.error('사용자 정보 조회 실패:', error);
+            showLoginMenu();
+        }
+    }
+
+    function showLoginMenu() {
+        document.getElementById('userMenu').style.display = 'none';
+        document.getElementById('loginMenu').style.display = 'inline';
+        document.getElementById('userInfo').style.display = 'none';
+    }
+
+    function goToProfileEdit() {
+        window.location.href = '/profile/edit'; // 브라우저가 쿠키를 자동으로 담아서 GET 요청을 보냄
+    }
+
+    async function logout(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch('/logout', { // 서버에 로그아웃 요청
+                method: 'POST'
+            });
+            if (response.ok) {
+                alert('로그아웃 성공');
+                window.location.href = '/'; // 로그아웃 성공 시 메인 페이지로 이동
+            } else {
+                alert('로그아웃 실패');
+            }
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+            alert('로그아웃 중 오류가 발생했습니다.');
+        }
+    }
+</script>
+
+</body>
+</html>
