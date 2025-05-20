@@ -3,6 +3,8 @@ package io.github.petty.config;
 import io.github.petty.users.jwt.JWTFilter;
 import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.jwt.LoginFilter;
+import io.github.petty.users.oauth2.CustomOAuth2UserService;
+import io.github.petty.users.oauth2.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,16 +20,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+    public SecurityConfig(
+            AuthenticationConfiguration authenticationConfiguration,
+            JWTUtil jwtUtil,
+            CustomOAuth2UserService customOAuth2UserService,
+            OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
-    //AuthenticationManager Bean 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -41,13 +49,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
-                .formLogin(form -> form.disable()) // 로그인 비활성화
-                .httpBasic(basic -> basic.disable()) // HTTP Basic 인증 비활성화
+                .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/user").authenticated() // 로그인이 필요한 페이지
+                        .requestMatchers("/user").authenticated()
+                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .anyRequest().permitAll())
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // 클라이언트 측 로그아웃 요청 URL과 일치
+                        .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트 URL
+                        .deleteCookies("jwt") // 로그아웃 시 jwt 쿠키 삭제
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                )
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session

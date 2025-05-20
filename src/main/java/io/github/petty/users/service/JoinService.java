@@ -33,6 +33,7 @@ public class JoinService {
         users.setDisplayName(displayName);
         users.setPhone(phone);
         users.setRole(Role.ROLE_USER.name());
+        users.setProvider("local");
         userRepository.save(users);
 
         return true;

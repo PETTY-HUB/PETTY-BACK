@@ -4,8 +4,11 @@ import io.github.petty.users.dto.CustomUserDetails;
 import io.github.petty.users.entity.Users;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +19,8 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private static final Logger logger = LoggerFactory.getLogger(JWTFilter.class);
+
 
     public JWTFilter(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -23,28 +28,39 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = null;
 
-        //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        // 1. 쿠키에서 토큰 확인
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    logger.debug("Token found in Cookie");
+                    break;
+                }
+            }
+        }
 
-        //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        // 2. 쿠키에 토큰이 없으면 Authorization 헤더에서 확인
+        if (token == null) {
+            String authorization = request.getHeader("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.split(" ")[1];
+                logger.debug("Token found in Authorization header");
+            }
+        }
 
-            System.out.println("token null");
+        // 토큰이 없는 경우 필터 체인 계속 진행
+        if (token == null) {
+            logger.debug("Token not found in either Cookie or Authorization header");
             filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 
-        System.out.println("authorization now");
-        //Bearer 부분 제거 후 순수 토큰만 획득
-        String token = authorization.split(" ")[1];
-
-        //토큰 소멸 시간 검증
+        // 토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-
-            System.out.println("token expired");
+            logger.debug("Token expired");
+            SecurityContextHolder.clearContext(); // 인증정보 삭제
             // 토큰이 만료되었을 때 401 Unauthorized 응답을 반환
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
             response.getWriter().write("{\"error\": \"Token has expired\"}"); // 에러 메시지

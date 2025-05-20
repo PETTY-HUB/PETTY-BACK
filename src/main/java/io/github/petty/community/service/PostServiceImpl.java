@@ -42,7 +42,6 @@ public class PostServiceImpl implements PostService {
         post.setLikeCount(0);
         postRepository.save(post);
 
-        // ✅ 수정된 saveImages 호출
         postImageService.saveImages(post, request.getImages());
 
         return post.getId();

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.petty.users.dto.CustomUserDetails;
 import io.github.petty.users.dto.LoginDTO;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,10 @@ import java.util.Iterator;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+
+    // expirationTime 주입
+    @Value("${jwt.expiration-time}")
+    private long expirationTime;
 
     public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
 
@@ -63,9 +69,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
 
         String role = auth.getAuthority();
-        String token = jwtUtil.createJwt(username, role, 60*60L);
+        String token = jwtUtil.createJwt(username, role, 3600000L); // expirationTime
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // JWT 토큰을 쿠키에 저장
+        Cookie jwtCookie = new Cookie("jwt", token);
+        jwtCookie.setHttpOnly(true); // JavaScript 접근 방지 (XSS 방어)
+        jwtCookie.setPath("/"); // 쿠키의 유효 경로
+        // jwtCookie.setSecure(true); // HTTPS 환경에서만 전송 (로컬호스트에서는 생략)
+        int maxAgeSeconds = (int) (3600000L / 1000); // 만료 시간을 초 단위로 변환
+        jwtCookie.setMaxAge(maxAgeSeconds); // 쿠키의 만료 시간 설정
+        response.addCookie(jwtCookie);
+
+//      response.addHeader("Authorization", "Bearer " + token);
     }
 
     //로그인 실패시

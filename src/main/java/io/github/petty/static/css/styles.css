@@ -1,0 +1,366 @@
+/* Keep your existing base styles (body, container, h1) */
+body {
+    font-family: "Noto Sans KR", sans-serif; /* Keep font */
+    max-width: 900px; /* Adjust max-width if needed */
+    margin: 20px auto;
+    padding: 0 15px; /* Add horizontal padding */
+    background-color: #fdf7e4;
+    color: #333;
+}
+
+.container {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #800000; /* Example color */
+    font-weight: 600;
+}
+
+h1 i { /* Style icon */
+    margin-right: 10px;
+    color: #007bff;
+}
+
+
+/* Search Section & Tabs */
+.search-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.tabs {
+    display: flex;
+    gap: 5px; /* Reduced gap */
+    margin-bottom: 20px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.tab {
+    padding: 10px 18px;
+    background-color: #e9ecef;
+    border: 1px solid transparent; /* Keep structure */
+    border-bottom: none; /* Remove bottom border here */
+    border-radius: 6px 6px 0 0; /* Round top corners */
+    cursor: pointer;
+    color: #495057;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    display: flex; /* Align icon and text */
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+}
+
+.tab:hover {
+    background-color: #d8dde2;
+}
+
+.tab.active {
+    background-color: #ffffff; /* Make active tab background white */
+    color: #007bff; /* Active tab text color */
+    border-color: #dee2e6 #dee2e6 #ffffff; /* Connect border */
+    border-bottom: 2px solid #ffffff; /* Cover the bottom border line */
+    position: relative; /* Position relative for margin adjustment */
+    bottom: -2px; /* Pull tab slightly down to overlap border */
+    font-weight: 600;
+}
+
+.tab i { /* Icon styling */
+    font-size: 0.9em;
+}
+
+/* Search Forms */
+.search-box {
+    display: none; /* Hidden by default */
+    padding-top: 15px;
+}
+
+.search-box.active {
+    display: block; /* Show active form */
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 15px; /* Space between columns */
+    margin-bottom: 15px;
+}
+
+.form-group {
+    flex: 1; /* Each group tries to take equal space */
+    min-width: 180px; /* Minimum width before wrapping */
+}
+
+.form-group.button-group {
+    display: flex;
+    align-items: flex-end; /* Align button to bottom */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px 12px; /* Slightly larger padding */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+select[disabled] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    font-size: 1em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: inline-flex; /* Align icon and text */
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    justify-content: center; /* Center content */
+}
+
+button:hover {
+    opacity: 0.9;
+}
+button:active {
+    transform: translateY(1px); /* Simple press effect */
+}
+
+button.search-button { /* Main search button */
+    background-color: #007bff;
+    color: white;
+    width: 100%; /* Make main search button full width */
+    font-weight: 500;
+}
+button.search-button:hover {
+    background-color: #0056b3;
+}
+
+
+#getLocationBtn {
+    background-color: #6c757d; /* Secondary color */
+    color: white;
+    width: 100%; /* Fill group width */
+}
+#getLocationBtn:hover {
+    background-color: #5a6268;
+}
+
+/* Loading Indicator */
+#loading {
+    display: none; /* Hidden initially */
+    text-align: center;
+    padding: 30px 0;
+    color: #555;
+}
+
+.spinner { /* Simple CSS spinner */
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* Results Area & Items */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 20px; /* Space between cards */
+    margin-top: 20px;
+}
+
+.result-item.card { /* Styling result items as cards */
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    background-color: #fff;
+    overflow: hidden; /* Clip image corners */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease-in-out;
+}
+.result-item.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+
+.card-img-top {
+    width: 100%;
+    height: 180px; /* Fixed height for images */
+    object-fit: cover; /* Cover the area, cropping if needed */
+    background-color: #eee; /* Placeholder color */
+}
+.img-placeholder {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    color: #adb5bd;
+    font-size: 0.9em;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.card-text {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 8px;
+    display: flex; /* Align icon and text */
+    align-items: center;
+    gap: 6px;
+}
+.card-text i { /* Style icons in card text */
+    color: #007bff;
+    width: 14px; /* Fixed width for alignment */
+    text-align: center;
+}
+
+.detail-button { /* Detail button within card */
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    background-color: #17a2b8; /* Info color */
+    color: white;
+}
+.detail-button:hover {
+    background-color: #138496;
+}
+
+
+.detail-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.85em; /* Smaller font for details */
+}
+.detail-section h6 {
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.detail-section h6 i {
+    color: #007bff;
+}
+.detail-section p {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+.detail-section strong {
+    color: #333;
+}
+
+
+/* Pagination */
+#pagination {
+    margin-top: 30px; /* More space before pagination */
+    padding-bottom: 20px;
+}
+
+#loadMoreBtn {
+    background-color: #28a745; /* Success color */
+    color: white;
+    padding: 10px 25px;
+    font-weight: 500;
+}
+#loadMoreBtn:hover {
+    background-color: #218838;
+}
+
+/* Error Messages */
+.error-message, .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #721c24; /* Danger text color */
+    background-color: #f8d7da; /* Danger background */
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+.no-results { /* Different style for no results */
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+
+/* Responsive Adjustments (Example) */
+@media (max-width: 768px) {
+    .results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    h1 { font-size: 1.8em;}
+}
+
+@media (max-width: 576px) {
+    body { padding: 0 10px;}
+    .container { padding: 15px; }
+    h1 { font-size: 1.5em; margin-bottom: 20px;}
+    .tabs { flex-wrap: wrap; } /* Allow tabs to wrap */
+    .tab { flex-grow: 1; text-align: center; } /* Make tabs fill width */
+    .form-row { flex-direction: column; gap: 10px;} /* Stack form elements */
+    .results-grid {
+        grid-template-columns: 1fr; /* Single column layout */
+        gap: 15px;
+    }
+    .card-img-top, .img-placeholder { height: 160px; }
+}

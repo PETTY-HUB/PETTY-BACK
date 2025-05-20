@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>반려동물 동반여행 정보 검색</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<div class="container">
+    <h1><i class="fas fa-paw"></i> 반려동물 동반여행 정보</h1> <div class="search-section">
+    <div class="tabs" role="tablist">
+        <div class="tab active" role="tab" id="tab-area" onclick="switchSearchType('area')" aria-controls="areaSearch" aria-selected="true">
+            <i class="fas fa-map-marker-alt"></i> 지역별 검색
+        </div>
+        <div class="tab" role="tab" id="tab-location" onclick="switchSearchType('location')" aria-controls="locationSearch" aria-selected="false">
+            <i class="fas fa-location-arrow"></i> 내 위치 주변 검색
+        </div>
+    </div>
+
+    <form id="areaSearch" class="search-box active" role="tabpanel" aria-labelledby="tab-area" onsubmit="return false;"> <div class="form-row">
+        <div class="form-group">
+            <label for="areaCode">지역:</label>
+            <select id="areaCode" name="areaCode" aria-label="지역 선택">
+                <option value="">지역 선택</option>
+                <option value="1">서울</option>
+                <option value="2">인천</option>
+                <option value="3">대전</option>
+                <option value="4">대구</option>
+                <option value="5">광주</option>
+                <option value="6">부산</option>
+                <option value="7">울산</option>
+                <option value="8">세종특별자치시</option>
+                <option value="31">경기도</option>
+                <option value="32">강원특별자치도</option>
+                <option value="33">충청북도</option>
+                <option value="34">충청남도</option>
+                <option value="35">경상북도</option>
+                <option value="36">경상남도</option>
+                <option value="37">전북특별자치도</option>
+                <option value="38">전라남도</option>
+                <option value="39">제주도</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="sigunguCode">시군구:</label>
+            <select id="sigunguCode" name="sigunguCode" disabled aria-label="시군구 선택">
+                <option value="">시/군/구 선택</option>
+            </select>
+        </div>
+    </div>
+        <button type="button" class="search-button" onclick="searchByArea(0)">
+            <i class="fas fa-search"></i> 지역으로 검색
+        </button>
+    </form>
+
+    <form id="locationSearch" class="search-box" role="tabpanel" aria-labelledby="tab-location" onsubmit="return false;">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="mapY">위도(Latitude):</label>
+                <input type="number" step="any" id="mapY" placeholder="위도 값" aria-label="위도" />
+            </div>
+            <div class="form-group">
+                <label for="mapX">경도(Longitude):</label>
+                <input type="number" step="any" id="mapX" placeholder="경도 값" aria-label="경도" />
+            </div>
+
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="radius">반경(m):</label>
+                <select id="radius" aria-label="검색 반경">
+                    <option value="1000">1km</option>
+                    <option value="3000">3km</option>
+                    <option value="5000" selected>5km</option>
+                    <option value="10000">10km</option>
+                    <option value="20000">20km</option>
+                </select>
+            </div>
+            <div class="form-group button-group">
+                <button type="button" id="getLocationBtn" onclick="getCurrentLocation()">
+                    <i class="fas fa-map-marker"></i> 현재 위치 사용
+                </button>
+            </div>
+        </div>
+        <button type="button" class="search-button" onclick="searchByLocation(0)">
+            <i class="fas fa-search-location"></i> 주변 검색
+        </button>
+    </form>
+</div>
+
+    <div id="loading" style="display: none; text-align: center; padding: 20px;">
+        <div class="spinner"></div>
+        데이터를 불러오는 중...
+    </div>
+
+    <div id="results" class="results-grid">
+    </div>
+
+    <div id="pagination" style="text-align: center; margin-top: 20px;">
+        <button id="loadMoreBtn" style="display: none;" onclick="loadMore()">더 보기</button>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script th:src="@{/js/search.js}"></script>
+</body>
+</html>

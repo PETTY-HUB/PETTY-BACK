@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>프로필 수정</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fdf7e4;
+            color: #333;
+            padding: 20px;
+        }
+        h2 {
+            color: #f1c40f;
+            text-align: center;
+        }
+        .profile-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #f39c12;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #f39c12;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #f1c40f;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        input.invalid {
+            border-color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h2>프로필 수정</h2>
+<div class="profile-container">
+    <form id="editProfileForm" th:action="@{/profile/update}" th:object="${userProfile}" method="post" novalidate>
+        <div class="form-group">
+            <label for="displayName">사용자 이름</label>
+            <input type="text" id="displayName" name="displayName" th:field="*{displayName}" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">전화번호</label>
+            <input type="text" id="phone" name="phone" th:field="*{phone}" required>
+            <div class="error" id="phoneError">유효한 전화번호를 입력해주세요. (예: 01012345678)</div>
+        </div>
+        <button type="submit">수정하기</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editProfileForm');
+        const phoneInput = document.getElementById('phone');
+        const phoneErrorElement = document.getElementById('phoneError');
+
+        form.addEventListener('submit', function(e) {
+            const phone = phoneInput.value.trim();
+            const phoneRegex = /^01[016789]\d{7,8}$/;
+
+            // 초기화
+            phoneErrorElement.style.display = 'none';
+            phoneInput.classList.remove('invalid');
+
+            if (!phoneRegex.test(phone)) {
+                e.preventDefault(); // 폼 제출 막기
+                phoneErrorElement.style.display = 'block';
+                phoneInput.classList.add('invalid');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

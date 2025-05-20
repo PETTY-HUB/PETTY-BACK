@@ -2,6 +2,7 @@ package io.github.petty.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -37,7 +38,7 @@ import java.util.Map;
 @EnableJpaRepositories(
         basePackages = {
                 "io.github.petty.users.repository",
-//                "io.github.petty.community.repository",
+                "io.github.petty.community.repository",
         },
         entityManagerFactoryRef = "supabaseEntityManagerFactory",
         transactionManagerRef = "supabaseTransactionManager"
@@ -62,18 +63,18 @@ public class SupabaseDataSourceConfig {
     public LocalContainerEntityManagerFactoryBean supabaseEntityManagerFactory(
             // datasource 2개 이상일 경우 명시
             @Qualifier("supabaseDataSource") DataSource dataSource,
-            EntityManagerFactoryBuilder builder
-    ) {
+            EntityManagerFactoryBuilder builder,
+            @Value("${spring.jpa.hibernate.ddl-auto}") String ddlAuto) { // ddl-auto 주입
         Map<String, Object> jpaProperties = new HashMap<>();
         jpaProperties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
         // ddl.auto
-        jpaProperties.put("hibernate.hbm2ddl.auto", "update");
+        jpaProperties.put("hibernate.hbm2ddl.auto", ddlAuto);
 
         return builder.dataSource(dataSource)
                 .packages(
-                        "io.github.petty.users.entity"
-//                        "io.github.petty.community.entity"
+                        "io.github.petty.users.entity",
+                        "io.github.petty.community.entity"
                 ).persistenceUnit("supabase") // 중복 X
                 .properties(jpaProperties) // 대소문자 구분 X
                 .build();
