@@ -76,7 +76,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	// SpringAI API
-	//implementation 'io.grpc:grpc-xds:1.62.2' //추가(yum)
+	implementation 'io.grpc:grpc-xds:1.62.2'
 	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 	implementation "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
