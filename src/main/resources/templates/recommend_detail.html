@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
+<head>
+    <title>여행지 상세 정보</title>
+    <th:block layout:fragment="css">
+        <style>
+            .detail-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .detail-header {
+                background: var(--card-bg-color);
+                padding: 30px;
+                border-radius: var(--border-radius-lg);
+                box-shadow: var(--box-shadow-light);
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            .detail-header h1 {
+                color: var(--point-color);
+                font-size: 2.2em;
+                margin-bottom: 15px;
+            }
+
+            .detail-header .address {
+                color: var(--secondary-text-color);
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .detail-image {
+                width: 100%;
+                max-width: 600px;
+                height: 400px;
+                object-fit: cover;
+                border-radius: var(--border-radius-md);
+                margin: 20px auto;
+                display: block;
+                box-shadow: var(--box-shadow-light);
+            }
+
+            .detail-section {
+                background: var(--card-bg-color);
+                padding: 25px;
+                border-radius: var(--border-radius-lg);
+                box-shadow: var(--box-shadow-light);
+                margin-bottom: 25px;
+            }
+
+            .detail-section h2 {
+                color: var(--point-color);
+                font-size: 1.5em;
+                margin-bottom: 20px;
+                border-bottom: 2px solid var(--point-color);
+                padding-bottom: 10px;
+            }
+
+            .detail-item {
+                margin-bottom: 15px;
+                padding: 10px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .detail-item:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+
+            .detail-item strong {
+                color: var(--text-color);
+                display: inline-block;
+                width: 150px;
+                margin-right: 10px;
+            }
+
+            .detail-item span {
+                color: var(--secondary-text-color);
+                line-height: 1.6;
+            }
+
+            .overview-section {
+                background: var(--card-bg-color);
+                padding: 25px;
+                border-radius: var(--border-radius-lg);
+                box-shadow: var(--box-shadow-light);
+                margin-bottom: 25px;
+            }
+
+            .overview-text {
+                color: var(--secondary-text-color);
+                line-height: 1.8;
+                font-size: 1.05em;
+            }
+
+            .contact-info {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                margin-top: 15px;
+            }
+
+            .contact-item {
+                background: #f8f9fa;
+                padding: 10px 15px;
+                border-radius: var(--border-radius-sm);
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .back-button {
+                background: var(--point-color);
+                color: white;
+                padding: 12px 25px;
+                border: none;
+                border-radius: var(--border-radius-md);
+                font-size: 1em;
+                cursor: pointer;
+                margin-bottom: 20px;
+                transition: background-color 0.3s ease;
+            }
+
+
+            .error-message {
+                background: #f8d7da;
+                color: #721c24;
+                padding: 20px;
+                border-radius: var(--border-radius-md);
+                text-align: center;
+                font-size: 1.1em;
+            }
+
+            .no-image-placeholder {
+                width: 100%;
+                max-width: 600px;
+                height: 400px;
+                background-color: #f0f0f0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #ccc;
+                font-size: 1.2em;
+                border-radius: var(--border-radius-md);
+                margin: 20px auto;
+                box-shadow: var(--box-shadow-light);
+            }
+
+            @media (max-width: 768px) {
+                .contact-info {
+                    flex-direction: column;
+                }
+
+                .detail-item strong {
+                    width: 100%;
+                    margin-bottom: 5px;
+                    display: block;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <main class="detail-container">
+        <button class="back-button" onclick="history.back()">← 뒤로 가기</button>
+
+        <div th:if="${error}" class="error-message">
+            <h2>오류 발생</h2>
+            <p th:text="${error}"></p>
+        </div>
+
+        <div th:if="${contentDetail}" class="detail-content">
+            <!-- 헤더 섹션 -->
+            <div class="detail-header">
+                <h1 th:text="${contentDetail.title}">여행지 이름</h1>
+                <div class="address" th:text="${contentDetail.addr1}">주소</div>
+                <div th:if="${contentDetail.addr2}" class="address" th:text="${contentDetail.addr2}">상세주소</div>
+            </div>
+
+            <!-- 이미지 섹션 -->
+            <div th:if="${contentDetail.firstImage}">
+                <img th:src="${contentDetail.firstImage}" alt="여행지 이미지" class="detail-image" />
+            </div>
+            <div th:unless="${contentDetail.firstImage}" class="no-image-placeholder">
+                이미지 없음
+            </div>
+
+            <!-- 개요 섹션 -->
+            <div th:if="${contentDetail.overview}" class="overview-section">
+                <h2>🏞️ 소개</h2>
+                <div class="overview-text" th:text="${contentDetail.overview}">소개 내용</div>
+            </div>
+
+            <!-- 기본 정보 섹션 -->
+            <div class="detail-section">
+                <h2>📍 기본 정보</h2>
+
+                <div class="contact-info">
+                    <div th:if="${contentDetail.tel}" class="contact-item">
+                        <strong>📞 전화번호:</strong><br>
+                        <span th:text="${contentDetail.tel}">전화번호</span>
+                    </div>
+                    <div th:if="${contentDetail.telName}" class="contact-item">
+                        <strong>👤 담당자:</strong><br>
+                        <span th:text="${contentDetail.telName}">담당자명</span>
+                    </div>
+                </div>
+
+                <div th:if="${contentDetail.homepage}" class="detail-item">
+                    <strong>🌐 홈페이지:</strong>
+                    <span>
+                        <a th:href="${contentDetail.homepage}" target="_blank" rel="noopener">홈페이지 바로가기</a>
+                    </span>
+                </div>
+
+                <div th:if="${contentDetail.zipcode}" class="detail-item">
+                    <strong>📮 우편번호:</strong>
+                    <span th:text="${contentDetail.zipcode}">우편번호</span>
+                </div>
+            </div>
+
+            <!-- 반려동물 정보 섹션 -->
+            <div th:if="${contentDetail.petTourInfo}" class="detail-section">
+                <h2>🐾 반려동물 동반 정보</h2>
+
+                <div th:if="${contentDetail.petTourInfo.acmpyTypeCd}" class="detail-item">
+                    <strong>동반 유형:</strong>
+                    <span th:text="${contentDetail.petTourInfo.acmpyTypeCd}">동반 유형</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.acmpyPsblCpam}" class="detail-item">
+                    <strong>동반 가능 동물:</strong>
+                    <span th:text="${contentDetail.petTourInfo.acmpyPsblCpam}">동반 가능 동물</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.acmpyNeedMtr}" class="detail-item">
+                    <strong>동반 필요 조건:</strong>
+                    <span th:text="${contentDetail.petTourInfo.acmpyNeedMtr}">필요 조건</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.relaPosesFclty}" class="detail-item">
+                    <strong>관련 편의시설:</strong>
+                    <span th:text="${contentDetail.petTourInfo.relaPosesFclty}">편의시설</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.relaFrnshPrdlst}" class="detail-item">
+                    <strong>관련 비품 목록:</strong>
+                    <span th:text="${contentDetail.petTourInfo.relaFrnshPrdlst}">비품 목록</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.relaRntlPrdlst}" class="detail-item">
+                    <strong>관련 대여 상품:</strong>
+                    <span th:text="${contentDetail.petTourInfo.relaRntlPrdlst}">대여 상품</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.relaPurcPrdlst}" class="detail-item">
+                    <strong>관련 구매 상품:</strong>
+                    <span th:text="${contentDetail.petTourInfo.relaPurcPrdlst}">구매 상품</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.relaAcdntRiskMtr}" class="detail-item">
+                    <strong>사고 예방 사항:</strong>
+                    <span th:text="${contentDetail.petTourInfo.relaAcdntRiskMtr}">사고 예방 사항</span>
+                </div>
+
+                <div th:if="${contentDetail.petTourInfo.etcAcmpyInfo}" class="detail-item">
+                    <strong>기타 동반 정보:</strong>
+                    <span th:text="${contentDetail.petTourInfo.etcAcmpyInfo}">기타 정보</span>
+                </div>
+            </div>
+
+            <!-- 추가 이미지들 (있는 경우) -->
+            <div th:if="${contentDetail.images and !#lists.isEmpty(contentDetail.images)}" class="detail-section">
+                <h2>📷 추가 이미지</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div th:each="image : ${contentDetail.images}">
+                        <img th:src="${image.originImgUrl}" th:alt="${image.imgName}"
+                             style="width: 100%; height: 150px; object-fit: cover; border-radius: var(--border-radius-sm);" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</th:block>
+
+<th:block layout:fragment="script">
+</th:block>
+</body>
+</html>

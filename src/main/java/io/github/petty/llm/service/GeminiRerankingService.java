@@ -9,6 +9,7 @@ import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.qdrant.client.grpc.Points;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +29,9 @@ public class GeminiRerankingService {
 
     private final ObjectMapper objectMapper;
 
-    public GeminiRerankResponseDTO rerankGemini(String userPrompt, List<RecommendResponseDTO.PlaceRecommend> candidates) {
+    public GeminiRerankResponseDTO rerankGemini(String userPrompt, List<Document> documents) {
         log.info("GeminiReranking 프롬프트 실행");
-        String prompt = buildRerankingPrompt(userPrompt, candidates);
+        String prompt = buildRerankingPrompt(userPrompt, documents);
         String response = null;
         try {
             response = callGemini(prompt);
@@ -40,7 +41,7 @@ public class GeminiRerankingService {
         return parseGemini(response);
     }
 
-    private String buildRerankingPrompt(String userPrompt, List<RecommendResponseDTO.PlaceRecommend> candidates) {
+    private String buildRerankingPrompt(String userPrompt, List<Document> documents) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("당신은 반려동물 동반 여행지 추천 전문가입니다. 사용자의 요청과 반려동물 정보를 바탕으로 다음 후보지들을 평가하고 순위를 매겨주세요.\n\n");
@@ -49,15 +50,17 @@ public class GeminiRerankingService {
         sb.append(userPrompt).append("\n");
 
         sb.append("후보 장소들:\n");
-        for (int i = 0; i < candidates.size(); i++) {
-            var place = candidates.get(i);
-            sb.append(String.format("%d. %s\n", i + 1, place.title()));
-            sb.append(String.format("   - 주소: %s\n", place.addr()));
-            sb.append(String.format("   - 설명: %s\n", place.description()));
-            sb.append(String.format("   - 동반 유형: %s\n", place.acmpyTypeCd()));
-            sb.append(String.format("   - 동반 가능: %s\n", place.acmpyPsblCpam()));
-            sb.append(String.format("   - 준비사항: %s\n", place.acmpyNeedMtr()));
-            sb.append(String.format("   - contentId: %s\n\n", place.contentId()));
+        for (int i = 0; i < documents.size(); i++) {
+            Document doc = documents.get(i);
+            String contentId = (String) doc.getMetadata().get("contentId");
+            String title = (String) doc.getMetadata().get("title");
+            String addr = (String) doc.getMetadata().get("address");
+            String description = doc.getText();
+
+            sb.append(String.format("%d. %s\n", i + 1, title));
+            sb.append(String.format("   - 주소: %s\n", addr));
+            sb.append(String.format("   - 설명: %s\n", description));
+            sb.append(String.format("   - contentId: %s\n\n", contentId));
         }
 
         sb.append("평가 기준:\n");
@@ -67,16 +70,17 @@ public class GeminiRerankingService {
 
         sb.append("요구사항:\n");
         sb.append("1. 사용자 요청사항과 평가 기준에 가장 적합한 순서로 정렬해주세요\n");
-        sb.append("2. 각 장소별로 사용자 요청에 맞는 구체적인 추천 이유를 50자 이내로 작성해주세요\n");
-        sb.append("3. 반려동물 동반이 불가능하거나 사용자 조건에 맞지 않는 경우 제외해주세요\n");
-        sb.append("4. 반드시 아래 JSON 형식으로만 응답해주세요:\n\n");
+        sb.append("2. 각 장소별로 사용자 요청에 맞는 구체적인 추천 이유를 100자 이내로 작성해주세요. 자연스러운 평문으로 추천해주세요.\n");
+        sb.append("3. 반려동물 동반이 불가능하거나 사용자 조건에 맞지 않는 장소는 제외해주세요.\n");
+        sb.append("4. 사용자가 원하는 관광지/숙소/레저/음식점/쇼핑 등 타입이 입력될 경우, 타입에 일치하는 곳만 포함해주세요. 예를 들어 음식점이라고 입력했을 경우 음식점만 출력되게 해주세요.\n");
+        sb.append("5. 반드시 아래 JSON 형식으로만 응답해주세요:\n\n");
 
 
         sb.append("{\n");
         sb.append("  \"rankedPlaces\": [\n");
         sb.append("    {\n");
-        sb.append("      \"contentId\": \"장소ID\",\n");
-        sb.append("      \"recommendReason\": \"추천 이유 (50자 이내)\"\n");
+        sb.append("      \"contentId\": \"장소ID(입력 받은 placeContentId)\",\n");
+        sb.append("      \"recommendReason\": \"추천 이유 (100자 이내)\"\n");
         sb.append("    }\n");
         sb.append("  ]\n");
         sb.append("}\n\n");

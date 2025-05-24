@@ -5,6 +5,8 @@ import io.github.petty.tour.entity.PetTourInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface PetTourInfoRepository extends JpaRepository<PetTourInfo, Long> {

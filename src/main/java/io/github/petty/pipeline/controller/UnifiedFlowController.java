@@ -31,7 +31,12 @@ public class UnifiedFlowController {
 
     // 1. 반려동물 분석 페이지 (초기 진입)
     @GetMapping("/analyze")
-    public String analyzePage() {
+    public String analyzePage(HttpSession session) {
+        // 새로운 분석 시작 시 이전 세션 데이터 정리
+        log.info("새로운 분석 시작 - 이전 세션 데이터 정리");
+        session.removeAttribute("recommendationResult");
+        session.removeAttribute("visionReport");
+        session.removeAttribute("lastAccessTime");
         return "analyze"; // analyze.html 반환
     }
 
@@ -44,6 +49,10 @@ public class UnifiedFlowController {
             HttpSession session
     ) {
         try {
+            // 세션 한 번 더 제거
+            session.removeAttribute("recommendationResult");
+            session.removeAttribute("visionReport");
+            session.removeAttribute("lastAccessTime");
             // interim 및 visionReport는 시간이 걸리는 작업이므로
             // 실제 구현에서는 비동기 처리 또는 로딩 페이지에서 Ajax 호출로 처리하는 것이 일반적입니다.
             // 여기서는 단순화를 위해 analyze POST 요청에서 미리 결과를 계산하고 전달합니다.
@@ -106,6 +115,7 @@ public class UnifiedFlowController {
             @RequestParam("petName") String petName,
             @RequestParam("location") String location,
             @RequestParam("info") String info,
+           //  @RequestParam("is_danger") String isDanger,
             RedirectAttributes redirectAttributes,
             HttpSession session
     ) {
@@ -169,9 +179,9 @@ public class UnifiedFlowController {
         // 필요에 따라 petName, location 등도 세션에서 가져와 모델에 추가할 수 있습니다.
         // model.addAttribute("petName", session.getAttribute("petName"));
 
-        // 사용 후 세션에서 제거 (선택 사항, 메모리 관리)
-        session.removeAttribute("recommendationResult");
-        session.removeAttribute("visionReport");
+//        // 사용 후 세션에서 제거 (선택 사항, 메모리 관리)
+//        session.removeAttribute("recommendationResult");
+//        session.removeAttribute("visionReport");
 
         return "recommendation_result"; // recommendation_result.html 반환
     }

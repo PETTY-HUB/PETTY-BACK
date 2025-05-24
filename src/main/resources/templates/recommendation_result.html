@@ -68,6 +68,18 @@
             text-align: center;
             flex-shrink: 0;
         }
+
+        /* 카드 링크 스타일 추가 */
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card-link:hover {
+            text-decoration: none;
+            color: inherit;
+        }
     </style>
 </th:block>
 </head>
@@ -76,17 +88,24 @@
     <main>
         <h1>🐾 추천 여행지</h1>
 
-        <div class="result-block" th:if="${recommendationResponse}">
+        <div class="result-block" th:if="${recommendation}">
             <h2>추천 여행지 리스트</h2>
-            <div th:each="place : ${recommendationResponse.recommend}" class="recommendation-card">
-                <img th:if="${place.imageUrl}" th:src="${place.imageUrl}" alt="여행지 이미지" class="place-image" />
-                <div th:unless="${place.imageUrl}" class="no-image-placeholder">이미지 없음</div>
+            <div th:each="place : ${recommendation.recommend}">
+                <a th:href="@{'/recommend/detail/' + ${place.contentId}}" class="card-link">
+                    <div class="recommendation-card">
+                        <img th:if="${place.imageUrl}" th:src="${place.imageUrl}" alt="여행지 이미지" class="place-image" />
+                        <div th:unless="${place.imageUrl}" class="no-image-placeholder">이미지 없음</div>
 
-                <div class="place-details">
-                    <h3 th:text="${place.title}"></h3>
-                    <p><strong>주소:</strong> <span th:text="${place.addr}"></span></p>
-                    <p><strong>설명:</strong> <span th:text="${place.description}"></span></p>
-                </div>
+                        <div class="place-details">
+                            <h3 th:text="${place.title}"></h3>
+                            <p><strong>주소:</strong> <span th:text="${place.addr}"></span></p>
+                            <p><strong>추천 이유:</strong> <span th:text="${place.recommendReason}"></span></p>
+                            <p><strong>가능 동물:</strong> <span th:text="${place.acmpyPsblCpam ?: '정보 없음'}"></span></p>
+                            <p><strong>동반 유형:</strong> <span th:text="${place.acmpyTypeCd ?: '정보 없음'}"></span></p>
+                            <p><strong>준비물:</strong> <span th:text="${place.acmpyNeedMtr ?: '정보 없음'}"></span></p>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
 

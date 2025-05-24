@@ -2,6 +2,7 @@ package io.github.petty.llm.service;
 
 import io.github.petty.llm.dto.GeminiRerankRequestDTO;
 import io.github.petty.llm.dto.GeminiRerankResponseDTO;
+import io.qdrant.client.grpc.PointsInternalService;
 import lombok.extern.slf4j.Slf4j;
 import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.dto.RecommendResponseDTO;
@@ -11,6 +12,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
+import io.github.petty.tour.entity.Content;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ public class RecommendServiceImpl implements RecommendService {
     private final VectorStoreService vectorStoreService;
     private final ContentService contentService;
     private final GeminiRerankingService geminiRerankingService;
+
 
     @Override
     public RecommendResponseDTO recommend(Map<String, String> promptMap) {
@@ -42,23 +45,18 @@ public class RecommendServiceImpl implements RecommendService {
                 return new RecommendResponseDTO(new ArrayList<>());
             }
 
-            List<RecommendResponseDTO.PlaceRecommend> recommendations = buildRecommendResponse(docs);
-
             // Gemini 리랭킹
-            GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, recommendations);
-
-            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = applyRerankingResults(recommendations, rerank);
+            GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, docs);
+            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = buildRecommendResponse(rerank);
             return new RecommendResponseDTO(finalRecommendations);
 
-            // 결과로 바로 dto
-            // return buildRecommendResponse(docs);
         } catch (Exception e) {
             log.error("추천 처리 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("추천 생성 실패: " + e.getMessage(), e);
         }
     }
 
-            // 사용자 입력 기반 프롬프트 생성
+    // 사용자 입력 기반 프롬프트 생성
     private String buildPrompt(Map<String, String> promptMap) {
         StringBuilder sb = new StringBuilder();
 
@@ -69,7 +67,7 @@ public class RecommendServiceImpl implements RecommendService {
 
         sb.append(String.format("%s 정도의 몸무게를 가진 %s 종이에요.\n", weight, species));
 
-        if(isDanger.equals("true")) {
+        if (isDanger.equals("true")) {
             sb.append("맹견이에요\n");
         } else {
             sb.append("소형견, 중형견이에요\n");
@@ -78,7 +76,7 @@ public class RecommendServiceImpl implements RecommendService {
         sb.append(String.format("위치는 %s 근처이고, \n", location));
 
         String info = promptMap.get("info");
-        if(info != null) {
+        if (info != null) {
             sb.append("추가로 이 장소의 설명은: ").append(info).append("\n");
         }
         return sb.toString();
@@ -113,87 +111,54 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     // 유사도 검색
-    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(List<Document> docs) {
-        List<RecommendResponseDTO.PlaceRecommend> recommends = new ArrayList<>();
-        Set<String> checkId = new HashSet<>();
+    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(GeminiRerankResponseDTO rerankResult) {
+        Set<String> seenIds = new HashSet<>();
 
-        for (Document doc : docs) {
-            String contentId = (String) doc.getMetadata().get("contentId");
-
-            // 중복체크
-            if (checkId.contains(contentId)) {
-                log.debug("중복된 contentId 발견하여 건너뜀: {}", contentId);
-                continue;
-            }
-            checkId.add(contentId);
-
-            String title = (String) doc.getMetadata().get("title");
-            String addr = (String) doc.getMetadata().get("address");
-            String description = doc.getText();
-//            String petInfo = (String) doc.getMetadata().getOrDefault("petTourInfo", "");
-            String imageUrl = contentService.getImageUrl(contentId);
-
-            Optional<DetailPetDto> petInfoOpt = contentService.getPetInfo(contentId);
-
-            String acmpyTypeCd = "정보 없음";
-            String acmpyPsblCpam = "정보 없음";
-            String acmpyNeedMtr = "정보 없음";
-
-            if (petInfoOpt.isPresent()) {
-                var petInfo = petInfoOpt.get();
-                if (petInfo.getAcmpyTypeCd() != null && !petInfo.getAcmpyTypeCd().isBlank())
-                    acmpyTypeCd = petInfo.getAcmpyTypeCd();
-                if (petInfo.getAcmpyPsblCpam() != null && !petInfo.getAcmpyPsblCpam().isBlank())
-                    acmpyPsblCpam = petInfo.getAcmpyPsblCpam();
-                if (petInfo.getAcmpyNeedMtr() != null && !petInfo.getAcmpyNeedMtr().isBlank())
-                    acmpyNeedMtr = petInfo.getAcmpyNeedMtr();
-            }
-
-            recommends.add(new RecommendResponseDTO.PlaceRecommend(
-                    contentId, title, addr, description, imageUrl,
-                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr, null
-            ));
-        }
-        return recommends;
-    }
-
-
-    /**
-     * 리랭킹 결과를 원본 추천 리스트에 적용
-     */
-    private List<RecommendResponseDTO.PlaceRecommend> applyRerankingResults(
-            List<RecommendResponseDTO.PlaceRecommend> initialRecommends,
-            GeminiRerankResponseDTO rerankResult) {
-
-        // contentId를 키로 하는 맵 생성
-        Map<String, RecommendResponseDTO.PlaceRecommend> recommendMap = initialRecommends.stream()
-                .collect(Collectors.toMap(
-                        RecommendResponseDTO.PlaceRecommend::contentId,
-                        recommend -> recommend
-                ));
-
-        // 리랭킹 결과를 점수순으로 정렬하고 상위 10개만 선택
-        return rerankResult.rankedPlaces().stream()
+        List<RecommendResponseDTO.PlaceRecommend> resultList = rerankResult.rankedPlaces().stream()
                 .map(ranked -> {
-                    RecommendResponseDTO.PlaceRecommend original = recommendMap.get(ranked.contentId());
-                    if (original != null) {
-                        // 추천 이유와 점수를 포함한 새로운 객체 생성
-                        return new RecommendResponseDTO.PlaceRecommend(
-                                original.contentId(),
-                                original.title(),
-                                original.addr(),
-                                original.description(),
-                                original.imageUrl(),
-                                original.acmpyTypeCd(),
-                                original.acmpyPsblCpam(),
-                                original.acmpyNeedMtr(),
-                                ranked.recommendReason()
-                        );
+                    String contentId = ranked.contentId();
+
+                    // contentId 중복 검사
+                    if (!seenIds.add(contentId)) {
+                        return null;
                     }
+
+                    try {
+                        Optional<Content> contentOpt = contentService.findByContentId(contentId);
+                        if (contentOpt.isPresent()) {
+                            Content content = contentOpt.get();
+                            String imageUrl = contentService.getImageUrl(contentId);
+
+                            String acmpyTypeCd = "";
+                            String acmpyPsblCpam = "";
+                            String acmpyNeedMtr = "";
+
+                            if (content.getPetTourInfo() != null) {
+                                acmpyTypeCd = Optional.ofNullable(content.getPetTourInfo().getAcmpyTypeCd()).orElse("");
+                                acmpyPsblCpam = Optional.ofNullable(content.getPetTourInfo().getAcmpyPsblCpam()).orElse("");
+                                acmpyNeedMtr = Optional.ofNullable(content.getPetTourInfo().getAcmpyNeedMtr()).orElse("");
+                            }
+
+                            return new RecommendResponseDTO.PlaceRecommend(
+                                    contentId,
+                                    Optional.ofNullable(content.getTitle()).orElse(""),
+                                    Optional.ofNullable(content.getAddr1()).orElse(""),
+                                    Optional.ofNullable(content.getOverview()).orElse(""),
+                                    imageUrl,
+                                    acmpyTypeCd,
+                                    acmpyPsblCpam,
+                                    acmpyNeedMtr,
+                                    ranked.recommendReason()
+                            );
+                        }
+                    } catch (Exception e) {
+                        log.error("contentId {}에 대한 정보 조회 중 오류 발생: {}", contentId, e.getMessage());
+                    }
+
                     return null;
                 })
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        return resultList;
     }
-
 }
