@@ -14,14 +14,13 @@
 </head>
 <body onclick="closeMenuOnClickOutside(event)">
 
-<div th:replace="fragments/header :: mainHeader"></div>
-
-<div th:replace="fragments/navbar :: sideMenuContent"></div>
+<div th:replace="~{fragments/header :: mainHeader}"></div>
+<div th:replace="~{fragments/navbar :: sideMenuContent}"></div>
 
 <main layout:fragment="content">
 </main>
 
-<div th:replace="fragments/footer :: mainFooter"></div>
+<div th:replace="~{fragments/footer :: mainFooter}"></div>
 
 <script th:src="@{/js/flow.js}"></script>
 

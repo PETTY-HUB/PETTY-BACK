@@ -10,37 +10,71 @@ import org.mapstruct.Named;
 import java.math.BigDecimal;
 import java.util.List;
 
-// MapStruct Mapper 설정: Spring 컴포넌트로 만들고, 필요한 매퍼를 주입받을 수 있도록 설정
+/**
+ * 엔티티 객체와 DTO 객체 간의 변환을 처리하는 MapStruct 매퍼 인터페이스입니다.
+ * Spring의 컴포넌트로 등록되어 의존성 주입을 통해 사용됩니다 (`componentModel = "spring"`).
+ */
 @Mapper(componentModel = "spring")
 public interface ContentMapper {
 
-// --- Content -> DetailCommonDto ---
+    // --- Content 엔티티 -> DetailCommonDto 변환 관련 ---
 
-    @Mapping(target = "images", ignore = true)
-    @Mapping(target = "infos", ignore = true)
-    @Mapping(target = "rooms", ignore = true)
-    @Mapping(target = "introDetails", ignore = true)
+    /**
+     * {@link Content} 엔티티를 {@link DetailCommonDto}로 변환합니다.
+     * 연관된 컬렉션(images, infos, rooms) 및 단일 객체(introDetails, petTourInfo)도 함께 매핑합니다.
+     *
+     * @param content 변환할 Content 엔티티 객체
+     * @return 변환된 DetailCommonDto 객체
+     */
+    @Mapping(source = "contentImages", target = "images")
+    @Mapping(source = "contentInfos", target = "infos")
+    @Mapping(source = "roomInfos", target = "rooms")
+    @Mapping(source = "contentIntro", target = "introDetails")
     DetailCommonDto contentToDetailCommonDto(Content content);
 
-
-    // --- ContentImage -> DetailImageDto ---
-    @Mapping(target = "contentId", ignore = true)
+    /**
+     * {@link ContentImage} 엔티티를 {@link DetailImageDto}로 변환합니다.
+     * ({@code contentToDetailCommonDto} 내부에서 리스트 요소 변환 시 사용됨)
+     *
+     * @param image 변환할 ContentImage 엔티티 객체
+     * @return 변환된 DetailImageDto 객체
+     */
     DetailImageDto contentImageToDetailImageDto(ContentImage image);
 
-    // --- ContentInfo -> DetailInfoDto ---
-    @Mapping(target = "contentId", ignore = true)
-    @Mapping(target = "contentTypeId", ignore = true)
+    /**
+     * {@link ContentInfo} 엔티티를 {@link DetailInfoDto}로 변환합니다.
+     * ({@code contentToDetailCommonDto} 내부에서 리스트 요소 변환 시 사용됨)
+     *
+     * @param info 변환할 ContentInfo 엔티티 객체
+     * @return 변환된 DetailInfoDto 객체
+     */
     DetailInfoDto contentInfoToDetailInfoDto(ContentInfo info);
 
-    // --- ContentIntro -> DetailIntroDto ---
+    /**
+     * {@link ContentIntro} 엔티티를 {@link DetailIntroDto}로 변환합니다.
+     * {@code ContentIntro.introDetails (Map<String, Object>)} 필드가 {@code DetailIntroDto.introDetails}로 직접 매핑됩니다.
+     *
+     * @param intro 변환할 ContentIntro 엔티티 객체
+     * @return 변환된 DetailIntroDto 객체
+     */
     DetailIntroDto contentIntroToDetailIntroDto(ContentIntro intro);
 
-    // --- PetTourInfo -> DetailPetDto ---
+    /**
+     * {@link PetTourInfo} 엔티티를 {@link DetailPetDto}로 변환합니다.
+     *
+     * @param petInfo 변환할 PetTourInfo 엔티티 객체
+     * @return 변환된 DetailPetDto 객체
+     */
     DetailPetDto petTourInfoToDetailPetDto(PetTourInfo petInfo);
 
-    // --- RoomInfo -> RoomInfoDto ---
-    @Mapping(target = "contentId", ignore = true)
-    @Mapping(target = "contentTypeId", ignore = true)
+    /**
+     * {@link RoomInfo} 엔티티를 {@link RoomInfoDto}로 변환합니다.
+     * 숫자(BigDecimal) 타입의 요금 정보를 문자열로, Boolean 타입의 시설 유무 정보를 "Y"/"N" 문자열로 변환하는
+     * 커스텀 매핑 로직({@code qualifiedByName})을 사용합니다.
+     *
+     * @param room 변환할 RoomInfo 엔티티 객체
+     * @return 변환된 RoomInfoDto 객체
+     */
     @Mapping(source = "roomOffSeasonMinFee1", target = "roomOffSeasonMinFee1", qualifiedByName = "bigDecimalToString")
     @Mapping(source = "roomOffSeasonMinFee2", target = "roomOffSeasonMinFee2", qualifiedByName = "bigDecimalToString")
     @Mapping(source = "roomPeakSeasonMinFee1", target = "roomPeakSeasonMinFee1", qualifiedByName = "bigDecimalToString")
@@ -61,51 +95,96 @@ public interface ContentMapper {
     @Mapping(source = "roomHairdryer", target = "roomHairdryer", qualifiedByName = "booleanToYN")
     RoomInfoDto roomInfoToRoomInfoDto(RoomInfo room);
 
-    // --- Projection -> TourSummaryDto 매핑 메소드 ---
+
+    // --- TourSummaryProjection -> TourSummaryDto 변환 --
+
+    /**
+     * {@link TourSummaryProjection} 인터페이스(또는 객체)를 {@link TourSummaryDto}로 변환합니다.
+     * 주로 네이티브 쿼리 결과를 DTO로 매핑할 때 사용됩니다.
+     * 'distance' 필드를 'distanceMeters' 필드로 매핑합니다.
+     *
+     * @param projection 변환할 TourSummaryProjection 객체
+     * @return 변환된 TourSummaryDto 객체
+     */
     @Mapping(source = "distance", target = "distanceMeters")
     TourSummaryDto projectionToTourSummaryDto(TourSummaryProjection projection);
 
 
-    // Area -> CodeNameDto 매핑
-    @Mapping(source = "areaCode", target = "code") // 필드 이름이 다를 경우 명시적 매핑
+    // --- Area 엔티티 -> CodeNameDto 변환 ---
+
+    /**
+     * {@link Area} 엔티티를 {@link CodeNameDto}로 변환합니다.
+     * 'areaCode'를 'code'로, 'areaName'을 'name'으로 매핑합니다.
+     *
+     * @param area 변환할 Area 엔티티 객체
+     * @return 변환된 CodeNameDto 객체
+     */
+    @Mapping(source = "areaCode", target = "code")
     @Mapping(source = "areaName", target = "name")
     CodeNameDto areaToCodeNameDto(Area area);
+
+    /**
+     * {@link Area} 엔티티 리스트를 {@link CodeNameDto} 리스트로 변환합니다.
+     * (내부적으로 {@code areaToCodeNameDto} 메서드를 사용)
+     *
+     * @param areas 변환할 Area 엔티티 리스트
+     * @return 변환된 CodeNameDto 리스트
+     */
     List<CodeNameDto> areasToCodeNameDtos(List<Area> areas);
 
-    // Sigungu -> CodeNameDto 매핑
-    @Mapping(source = "sigunguCode", target = "code") // 필드 이름이 다를 경우 명시적 매핑
+
+    // --- Sigungu 엔티티 -> CodeNameDto 변환 ---
+
+    /**
+     * {@link Sigungu} 엔티티를 {@link CodeNameDto}로 변환합니다.
+     * 'sigunguCode'를 'code'로, 'sigunguName'을 'name'으로 매핑합니다.
+     *
+     * @param sigungu 변환할 Sigungu 엔티티 객체
+     * @return 변환된 CodeNameDto 객체
+     */
+    @Mapping(source = "sigunguCode", target = "code")
     @Mapping(source = "sigunguName", target = "name")
     CodeNameDto sigunguToCodeNameDto(Sigungu sigungu);
+
+    /**
+     * {@link Sigungu} 엔티티 리스트를 {@link CodeNameDto} 리스트로 변환합니다.
+     * (내부적으로 {@code sigunguToCodeNameDto} 메서드를 사용)
+     *
+     * @param sigungus 변환할 Sigungu 엔티티 리스트
+     * @return 변환된 CodeNameDto 리스트
+     */
     List<CodeNameDto> sigungusToCodeNameDtos(List<Sigungu> sigungus);
 
-    // --- Custom Mapping Helper Methods ---
 
+    // --- 커스텀 매핑 헬퍼 메서드 (MapStruct에서 @Named 어노테이션으로 참조) ---
+
+    /**
+     * {@link BigDecimal} 타입의 숫자 값을 평문자열(plain string) 형태로 변환합니다.
+     * 변환 시 불필요한 후행 0을 제거하고 (예: 10.00 -> "10"),
+     * 지수 표현(예: 1E+1) 대신 일반 숫자 문자열(예: "10")로 변환합니다.
+     * 값이 null이면 null을 반환합니다.
+     *
+     * @param value 변환할 BigDecimal 값
+     * @return 변환된 문자열 또는 null
+     */
     @Named("bigDecimalToString")
     default String bigDecimalToString(BigDecimal value) {
         return (value != null) ? value.stripTrailingZeros().toPlainString() : null;
-        // stripTrailingZeros() 는 10.00 -> 10 으로 변환
-        // toPlainString() 은 지수 표현(e.g., 1E+1) 대신 일반 숫자 문자열로 변환
     }
 
+    /**
+     * {@link Boolean} 타입의 값을 "Y" 또는 "N" 문자열로 변환합니다.
+     * true는 "Y"로, false는 "N"으로 변환됩니다.
+     * 입력 값이 null이면 null을 반환합니다. (요구사항에 따라 "N" 또는 빈 문자열 등으로 처리 변경 가능)
+     *
+     * @param value 변환할 Boolean 값
+     * @return "Y", "N" 또는 null
+     */
     @Named("booleanToYN")
     default String booleanToYN(Boolean value) {
         if (value == null) {
-            return null; // 또는 "N" 또는 빈 문자열 등 요구사항에 맞게 처리
-        }
-        return value ? "Y" : "N"; // 또는 "1" : "0"
-    }
-
-    // Set<Entity> -> List<DTO> 변환이 자동으로 안 될 경우 명시적으로 정의 가능
-    // (하지만 보통 MapStruct가 단일 매핑 메소드를 보고 자동으로 처리해줌)
-    /*
-    default List<DetailImageDto> contentImagesToDetailImageDtos(Set<ContentImage> images) {
-        if (images == null) {
             return null;
         }
-        return images.stream()
-                     .map(this::contentImageToDetailImageDto) // this:: 사용 주의 (default 메소드 내)
-                     .collect(Collectors.toList());
+        return value ? "Y" : "N"; // true이면 "Y", false이면 "N"
     }
-    // 다른 Set -> List 변환도 유사하게 정의 가능
-    */
 }

@@ -14,17 +14,6 @@ public class IndexController {
         return "index";
     }
 
-    // 여행지 추천
-    @GetMapping("/recommend")
-    public String recommendForm() {
-        return "recommend";
-    }
-
-    @GetMapping("/search")
-    public String searchPage() {
-        return "search";
-    }
-
     @GetMapping("/sync")
     public String syncPage() {
         return "syncTest";

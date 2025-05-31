@@ -1,0 +1,175 @@
+/* content_detail.css */
+
+.content-title {
+    color: var(--accent-color); /* From common.css */
+    font-weight: bold;
+}
+
+.section-title {
+    color: var(--point-color); /* From common.css */
+    font-size: 1.5em;
+    border-bottom: 2px solid var(--background-color);
+    padding-bottom: 0.5rem;
+}
+
+/* Image Gallery */
+.image-gallery-container {
+    position: sticky; /* Optional: makes gallery sticky on scroll */
+    top: 80px; /* Adjust based on header height */
+}
+.main-image-view {
+    width: 100%;
+    height: auto;
+    max-height: 500px; /* Max height for the main image */
+    object-fit: cover;
+    border: 1px solid var(--input-border-color);
+    background-color: #f8f9fa; /* Light background for images */
+}
+.thumbnail-strip {
+    padding-top: 0.5rem;
+}
+.thumbnail-strip img {
+    height: 70px;
+    width: auto; /* Maintain aspect ratio */
+    max-width: 100px; /* Prevent overly wide thumbnails */
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
+    object-fit: cover;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.thumbnail-strip img:hover {
+    transform: scale(1.05);
+    border-color: var(--point-color);
+}
+.thumbnail-strip img.active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.5);
+}
+
+.overview-box {
+    font-size: 1.05rem;
+}
+.overview-text {
+    white-space: pre-wrap; /* Respects newlines from DB */
+    color: var(--secondary-text-color);
+}
+
+/* Introduction Section */
+#introDetailsContainer .intro-item {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+#introDetailsContainer .intro-item strong {
+    color: var(--text-color);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+#introDetailsContainer .intro-item .value {
+    color: var(--secondary-text-color);
+    padding-left: 0.5em;
+    word-break: break-word;
+}
+
+/* Tabs Styling (Leverages Bootstrap, but you can add overrides) */
+.nav-tabs .nav-link {
+    font-weight: bold;
+    color: var(--secondary-text-color);
+}
+.nav-tabs .nav-link.active {
+    color: var(--accent-color);
+    border-color: var(--input-border-color) var(--input-border-color) #fff; /* Make active tab blend with content */
+}
+.tab-content {
+    font-size: 0.95rem;
+}
+.tab-content .spinner-border {
+    margin: 2rem auto;
+    display: block;
+}
+.tab-content p.text-muted {
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Pet Info & Room Info Specifics */
+.pet-info-section dl dt, .room-info-section dl dt {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 0.3rem;
+}
+.pet-info-section dl dd, .room-info-section dl dd {
+    margin-left: 0.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--secondary-text-color);
+    font-size: 0.9rem;
+    white-space: pre-wrap; /* For multi-line info */
+}
+
+.room-card {
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: var(--border-radius-md);
+    transition: box-shadow 0.2s ease;
+}
+.room-card:hover {
+    box-shadow: var(--box-shadow-light);
+}
+.room-card .room-image {
+    width: 100%;
+    height: 150px; /* Fixed height for room images in list */
+    object-fit: cover;
+    border-top-left-radius: var(--border-radius-md);
+    border-bottom-left-radius: var(--border-radius-md); /* For mobile view where img is full width */
+}
+@media (min-width: 768px) { /* md breakpoint */
+    .room-card .room-image {
+        border-top-left-radius: var(--border-radius-md);
+        border-bottom-left-radius: 0; /* Reset for larger screens */
+        border-top-right-radius: 0;
+    }
+}
+.room-card .card-title {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+.room-card .card-text {
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+.room-card .list-unstyled li {
+    font-size: 0.85em;
+    margin-bottom: 0.2rem;
+}
+.room-card .badge {
+    font-size: 0.75em;
+}
+
+/* Kakao Map InfoWindow Style */
+.kakao-infowindow {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow-light);
+    background-color: #fff;
+    border: 1px solid var(--input-border-color);
+    min-width: 180px;
+    text-align: left;
+}
+.kakao-infowindow strong {
+    display: block;
+    margin-bottom: 3px;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+.kakao-infowindow small {
+    color: var(--secondary-text-color);
+}
+
+#pageLoadingSpinner {
+    min-height: 70vh; /* Ensure spinner is somewhat centered on empty page */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

@@ -16,6 +16,7 @@ const TOUR_TYPE_MAP_DIRECT = {
     12: '관광지', 14: '문화시설', 15: '축제', 25: '여행코스', // 25는 예시, 실제 값 확인 필요
     28: '레포츠', 32: '숙박', 38: '쇼핑', 39: '음식점' // 38은 예시, 실제 값 확인 필요
 };
+let sigunguDataCache = {};
 
 function initializeKakaoDependentFeatures() {
     if (kakaoMapsApiIsReady) return;
@@ -181,7 +182,17 @@ function loadSigunguCodes(areaCode) {
         return;
     }
 
-    fetch(`/api/v1/contents/codes?areaCode=${areaCode}`)
+    // 1. 캐시 확인
+    if (sigunguDataCache[areaCode]) {
+        console.log(`[캐시 사용] areaCode ${areaCode}의 시/군/구 목록을 캐시에서 로드합니다.`);
+        populateDropdown(directSearchSigunguCodeSelect, sigunguDataCache[areaCode], "시/군/구 전체");
+        // populateDropdown 함수 내에서 selectElement.disabled = false; 처리하므로 여기서 별도 호출 안해도 됨
+        return; // 캐시된 데이터 사용 후 함수 종료
+    }
+
+    // 2. 캐시 없으면 API 호출
+    console.log(`[API 호출] areaCode ${areaCode}의 시/군/구 목록을 API에서 가져옵니다.`);
+    fetch(`/api/tour/codes?areaCode=${areaCode}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('시/군/구 정보 로드 실패: ' + response.statusText);
@@ -189,8 +200,9 @@ function loadSigunguCodes(areaCode) {
             return response.json();
         })
         .then(sigunguList => {
+            sigunguDataCache[areaCode] = sigunguList; // 3. API 응답 성공 시 캐시에 저장
             populateDropdown(directSearchSigunguCodeSelect, sigunguList, "시/군/구 전체");
-            console.log(`areaCode ${areaCode}에 대한 시/군/구 목록 로드 완료:`, sigunguList);
+            console.log(`areaCode ${areaCode}에 대한 시/군/구 목록 로드 및 캐시 완료:`, sigunguList);
         })
         .catch(error => {
             console.error(`areaCode ${areaCode}의 시/군/구 정보를 가져오는 중 오류 발생:`, error);
@@ -228,7 +240,7 @@ function fetchDirectSearchResults(append = false) {
 
 
     if (document.getElementById('useCurrentLocationSwitch').checked) {
-        baseUrl = '/api/v1/contents/search/location';
+        baseUrl = '/api/tour/search/location';
         if (!directSearchSelectedLatlng) {
             // alert('지도에서 현재 위치를 선택해주세요.'); // UX 개선: alert 대신 다른 방식 고려
             if(resultListDiv) resultListDiv.innerHTML = '<p class="text-center text-warning col-12 mt-4">지도에서 현재 위치를 선택해주세요.</p>';
@@ -240,7 +252,7 @@ function fetchDirectSearchResults(append = false) {
         params.append('radius', document.getElementById('directSearchRadius').value);
         if (keywordVal) params.append('keyword', keywordVal); // 위치 기반 검색 시 키워드 추가 (백엔드 지원 필요)
     } else {
-        baseUrl = '/api/v1/contents/search/area';
+        baseUrl = '/api/tour/search/area';
         const areaCode = document.getElementById('directSearchAreaCode').value;
         const sigunguCode = document.getElementById('directSearchSigunguCode').value;
 
