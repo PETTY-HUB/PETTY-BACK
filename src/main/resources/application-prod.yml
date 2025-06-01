@@ -6,3 +6,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+security:
+  cookie:
+    secure: true   # 배포환경
+    same-site: Lax

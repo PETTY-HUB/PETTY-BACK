@@ -24,6 +24,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JWTUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final UsersRepository usersRepository;
+    private final CookieUtils cookieUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -43,7 +44,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         UUID refreshToken = refreshTokenService.createRefreshToken(user);
 
         // 쿠키 설정 코드
-        CookieUtils.setTokenCookies(response, token, refreshToken);
+        cookieUtils.setTokenCookies(response, token, refreshToken);
 
         String targetUrl = "/";
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

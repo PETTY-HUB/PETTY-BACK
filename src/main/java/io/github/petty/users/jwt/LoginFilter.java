@@ -30,16 +30,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JWTUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final UsersRepository usersRepository;
+    private final CookieUtils cookieUtils;
 
     // expirationTime 주입
     @Value("${jwt.expiration-time}")
     private long expirationTime;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshTokenService refreshTokenService, UsersRepository usersRepository) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshTokenService refreshTokenService, UsersRepository usersRepository, CookieUtils cookieUtils) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
         this.usersRepository = usersRepository;
+        this.cookieUtils = cookieUtils;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         UUID refreshToken = refreshTokenService.createRefreshToken(user);
 
         // 쿠키 설정 코드
-        CookieUtils.setTokenCookies(response, token, refreshToken);
+        cookieUtils.setTokenCookies(response, token, refreshToken);
     }
 
     //로그인 실패시

@@ -28,13 +28,14 @@ public class UsersApiController {
     private final UserService userService;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
+    private final CookieUtils cookieUtils;
 
-
-    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService, UserService userService) {
+    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService, UserService userService, CookieUtils cookieUtils) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
+        this.cookieUtils = cookieUtils;
     }
 
     @GetMapping("/users/me")
@@ -90,7 +91,7 @@ public class UsersApiController {
             RefreshTokenResponseDTO tokenResponse = refreshTokenService.refreshAccessToken(refreshTokenId);
 
             // 쿠키 설정 코드
-            CookieUtils.setTokenCookies(response,
+            cookieUtils.setTokenCookies(response,
                     tokenResponse.getAccessToken(),
                     UUID.fromString(tokenResponse.getRefreshToken()));
 

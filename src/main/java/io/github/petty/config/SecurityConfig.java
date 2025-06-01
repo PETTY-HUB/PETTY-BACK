@@ -7,6 +7,7 @@ import io.github.petty.users.oauth2.CustomOAuth2UserService;
 import io.github.petty.users.oauth2.OAuth2SuccessHandler;
 import io.github.petty.users.repository.UsersRepository;
 import io.github.petty.users.service.RefreshTokenService;
+import io.github.petty.users.util.CookieUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final RefreshTokenService refreshTokenService;
     private final UsersRepository usersRepository;
+    private final CookieUtils cookieUtils;
 
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
@@ -35,13 +37,15 @@ public class SecurityConfig {
             CustomOAuth2UserService customOAuth2UserService,
             OAuth2SuccessHandler oAuth2SuccessHandler,
             RefreshTokenService refreshTokenService,
-            UsersRepository usersRepository) {
+            UsersRepository usersRepository,
+            CookieUtils cookieUtils) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.customOAuth2UserService = customOAuth2UserService;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
         this.refreshTokenService = refreshTokenService;
         this.usersRepository = usersRepository;
+        this.cookieUtils = cookieUtils;
     }
 
     @Bean
@@ -80,7 +84,7 @@ public class SecurityConfig {
                         .clearAuthentication(true)
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService, usersRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService, usersRepository, cookieUtils), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
