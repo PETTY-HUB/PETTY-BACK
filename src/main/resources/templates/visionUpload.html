@@ -3,211 +3,70 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <title>동물 이미지 분석</title>
+    <title>PETTY - 반려동물 보고서</title>
     <th:block layout:fragment="css">
-        <!-- Bootstrap CSS (필요시) -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+        <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}"/>
         <style>
-            /* 전체 폰트 설정 */
-            * {
-                font-family: 'HakgyoansimDunggeunmisoTTF-B', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            /* xxl 화면(1400px) 이상에서만 최대 너비를 1296px로 설정하여 search 페이지와 동일하게 만듭니다. */
+            @media (min-width: 1400px) {
+                .vision-container-custom {
+                    max-width: 1296px;
+                }
             }
 
-            /* body 배경색을 두 번째 이미지와 동일하게 설정 */
-            body {
-                background-color: var(--background-color, #f8f9fa);
-            }
-
-            /* 페이지 전용 스타일 */
-            .vision-container {
-                max-width: 600px;
-                margin: 0 auto;
-            }
-
-            .card {
-                margin-top: 2rem;
-                border-radius: var(--border-radius-lg, 12px);
-                box-shadow: var(--box-shadow-light, 0 4px 6px rgba(0, 0, 0, 0.1));
-                border: none;
-            }
-
-            .card-body {
-                padding: 2rem;
-            }
-
-            #imagePreview img {
-                max-height: 200px;
-                object-fit: contain;
-            }
-
-            .spinner-border {
-                width: 3rem;
-                height: 3rem;
-                color: var(--accent-color, #ff6b6b) !important;
-            }
-
-            #spinnerContainer {
-                background-color: var(--card-bg-color, #ffffff);
-                padding: 2rem;
-                border-radius: var(--border-radius-lg, 12px);
-                box-shadow: var(--box-shadow-light, 0 4px 6px rgba(0, 0, 0, 0.1));
-            }
-
-            #result {
-                background-color: var(--card-bg-color, #ffffff);
-                padding: 2rem;
-                border-radius: var(--border-radius-lg, 12px);
-                box-shadow: var(--box-shadow-light, 0 4px 6px rgba(0, 0, 0, 0.1));
-                margin-top: 2rem;
-            }
-
-            pre#finalReport {
-                background: var(--background-color, #f8f9fa);
-                padding: 1.5rem;
-                border-radius: var(--border-radius-sm, 8px);
-                white-space: pre-wrap;
-                word-wrap: break-word;
-                max-height: 500px;
-                overflow-y: auto;
-                border: 1px solid #e9ecef;
-                font-family: 'Noto Sans KR', monospace;
-            }
-
-            .alert {
-                border-radius: var(--border-radius-sm, 8px);
-            }
-
-            .btn-primary {
-                background-color: var(--accent-color, #ff6b6b);
-                border-color: var(--accent-color, #ff6b6b);
-                border-radius: 30px;
-                padding: 0.75rem 2rem;
-                font-weight: 500;
-                transition: all 0.3s ease;
-            }
-
-            .btn-primary:hover {
-                background-color: var(--button-hover-color, #ff5252);
-                border-color: var(--button-hover-color, #ff5252);
-                transform: translateY(-2px);
-            }
-
-            .form-label {
-                color: var(--secondary-text-color, #6c757d);
-                font-weight: 500;
-                margin-bottom: 0.5rem;
-            }
-
-            .form-control {
-                border-radius: var(--border-radius-sm, 8px);
-                border: 2px solid #e9ecef;
-                transition: border-color 0.3s ease;
-            }
-
-            .form-control:focus {
-                border-color: var(--accent-color, #ff6b6b);
-                box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
-            }
-
-            /* 중간 보고서 스타일 개선 */
-            #interim {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 1.5rem;
-                border-radius: var(--border-radius-lg, 12px);
-                margin-bottom: 1rem;
-                text-align: center;
-                font-weight: 500;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                transition: all 0.3s ease;
-            }
-
-            #interim.hidden {
-                opacity: 0;
-                transform: translateY(-20px);
-                pointer-events: none;
-            }
-
-            #analyzingMessage {
-                font-style: italic;
-                color: var(--secondary-text-color, #6c757d);
-                text-align: center;
-                margin: 1rem 0;
-                font-size: 0.9rem;
-            }
-
-            /* 로딩 애니메이션 개선 */
-            .loading-pulse {
-                animation: pulse 2s infinite;
-            }
-
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.5; }
-                100% { opacity: 1; }
-            }
-
-            /* 성공 메시지 스타일 */
-            .success-message {
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-                color: white;
-                padding: 1rem;
-                border-radius: var(--border-radius-lg, 12px);
-                text-align: center;
-                margin: 1rem 0;
-                font-weight: 500;
-            }
-            /* 비활성화된 폼 스타일 */
-            .disabled {
-                opacity: 0.6;
-                pointer-events: none;
-            }
-
-            /* 사용량 정보 박스 스타일 개선 */
+            /* 사용량 정보 박스의 고유한 그라데이션 디자인은 유지합니다. */
             .alert-info {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 border: none;
                 border-radius: var(--border-radius-lg);
             }
-
             .alert-warning {
                 background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
                 color: white;
                 border: none;
                 border-radius: var(--border-radius-lg);
             }
+
+            /* 기타 이 페이지에서만 필요한 스타일 */
+            #imagePreview img {
+                max-height: 200px;
+                object-fit: contain;
+            }
+            .loading-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
         </style>
     </th:block>
 </head>
 <body>
 <th:block layout:fragment="content">
-    <main>
-        <div class="vision-container">
-            <!-- 오프라인 알림 -->
-            <div id="offlineAlert" class="alert alert-warning" style="display: none;">
-                <i class="bi bi-wifi-off"></i> 오프라인 상태입니다. 인터넷 연결을 확인해주세요.
-            </div>
 
-            <!-- 메인 폼 카드 -->
-            <div class="card">
-                <div class="card-body" id="formContainer">
-                    <!-- ✅ 사용량 정보 표시 추가 -->
+    <div class="container vision-container-custom mt-4">
+        <div class="p-md-3 p-2 bg-white rounded shadow-sm">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+
                     <div th:if="${username}" class="alert alert-info text-center mb-4">
                         <strong>🎉 안녕하세요, <span th:text="${username}"></span>님!</strong><br>
                         <span th:if="${canUse}">
-                오늘 <strong th:text="${remainingUsage}"></strong>회 더 분석하실 수 있습니다.
-                (총 <span th:text="${dailyLimit}"></span>회 중 <span th:text="${dailyLimit - remainingUsage}"></span>회 사용됨)
-            </span>
+                            오늘 <strong th:text="${remainingUsage}"></strong>회 더 분석하실 수 있습니다.
+                            (총 <span th:text="${dailyLimit}"></span>회 중 <span th:text="${dailyLimit - remainingUsage}"></span>회 사용됨)
+                        </span>
                         <span th:unless="${canUse}" class="text-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-                오늘의 분석 한도(<span th:text="${dailyLimit}"></span>회)를 모두 사용하셨습니다.<br>
-                내일 다시 이용해주세요! 🐾
-            </span>
+                            <i class="bi bi-exclamation-triangle"></i>
+                            오늘의 분석 한도(<span th:text="${dailyLimit}"></span>회)를 모두 사용하셨습니다.<br>
+                            내일 다시 이용해주세요! 🐾
+                        </span>
                     </div>
 
-                    <!-- ✅ 로그인하지 않은 경우 안내 -->
                     <div th:unless="${username}" class="alert alert-warning text-center mb-4">
                         <i class="bi bi-lock"></i>
                         <strong>Vision 분석 기능을 이용하려면 로그인이 필요합니다.</strong><br>
@@ -216,24 +75,22 @@
 
                     <h3 class="text-center mb-4">🐾 반려동물 정보를 입력하세요</h3>
 
-                    <!-- ✅ 사용량 초과 시 폼 비활성화 -->
                     <form id="visionForm" th:classappend="${!canUse} ? 'disabled' : ''">
                         <div class="mb-3">
                             <label for="petName" class="form-label">반려동물 이름</label>
                             <input type="text" class="form-control" name="petName" id="petName"
                                    placeholder="반려동물의 이름을 입력하세요"
-                                   th:disabled="${!canUse}" required />
+                                   th:disabled="${!canUse}" required/>
                         </div>
                         <div class="mb-3">
                             <label for="file" class="form-label">이미지 선택</label>
                             <input type="file" class="form-control" name="file" id="file"
                                    accept="image/jpeg,image/jpg,image/png"
-                                   th:disabled="${!canUse}" required />
+                                   th:disabled="${!canUse}" required/>
                             <small class="text-muted">⚠️ JPEG, PNG 형식만 지원합니다 (최대 5MB)</small>
                         </div>
-                        <!-- 이미지 미리보기 -->
                         <div id="imagePreview" class="mb-3 text-center" style="display: none;">
-                            <img id="previewImg" src="" alt="미리보기" class="img-fluid rounded" />
+                            <img id="previewImg" src="" alt="미리보기" class="img-fluid rounded"/>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary" id="submitBtn"
@@ -245,50 +102,34 @@
                     </form>
                 </div>
             </div>
-            <!-- 로딩 스피너 -->
-            <div id="spinnerContainer" class="text-center mt-3" style="display: none">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3 loading-pulse">🔄 이미지 분석 중...</p>
-            </div>
+        </div>
 
-            <!-- 결과 표시 -->
-            <div id="result" style="display: none">
+        <div id="result" class="mt-4" style="display: none">
+            <div class="p-md-3 p-2 bg-white rounded shadow-sm">
                 <div class="mb-3 text-center">
-                    <img id="showImg" src="" alt="분석된 이미지" class="img-fluid rounded shadow"
-                         style="max-width: 100%" />
+                    <img id="showImg" src="" alt="분석된 이미지" class="img-fluid rounded shadow" style="max-width: 100%"/>
                 </div>
-
-                <!-- 중간 보고서 -->
-                <div id="interim" class="fw-bold" style="display: none;"></div>
-
-                <!-- 분석 중 메시지 -->
+                <div id="interim" class="fw-bold alert alert-secondary" style="display: none;"></div>
                 <div id="analyzingMessage" style="display: none;">
                     <small>📝 상세한 보고서를 작성 중입니다...</small>
                 </div>
-
-                <!-- 최종 보고서 -->
                 <pre id="finalReport" style="display: none;"></pre>
-
-                <!-- 성공 메시지 -->
-                <div id="successMessage" class="success-message" style="display: none;">
+                <div id="successMessage" class="alert alert-success" style="display: none;">
                     ✨ 분석이 완료되었습니다! 보고서 페이지로 이동합니다...
                 </div>
-
-                <!-- 에러 메시지 -->
                 <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
-
-                <!-- 돌아가기 버튼 -->
                 <div class="text-center mt-4">
                     <a href="/" class="btn btn-outline-secondary">⬅ 돌아가기</a>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </th:block>
 
 <th:block layout:fragment="script">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script th:inline="javascript">
         const form = document.getElementById('visionForm');
         const spinner = document.getElementById('spinnerContainer');
@@ -300,12 +141,9 @@
         const showImg = document.getElementById('showImg');
         const fileInput = document.getElementById('file');
         const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
         const errorMessage = document.getElementById('errorMessage');
-        const offlineAlert = document.getElementById('offlineAlert');
         const isLoggedIn = /*[[${username != null} ? 'true' : 'false']]*/ 'false';
         const canUse = /*[[${canUse} ? 'true' : 'false']]*/ 'false';
-        const remainingUsage = /*[[${remainingUsage}]]*/ 0;
 
         form.addEventListener('submit', async e => {
             e.preventDefault();

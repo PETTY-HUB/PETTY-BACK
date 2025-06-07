@@ -16,6 +16,6 @@ public class IndexController {
 
     @GetMapping("/sync")
     public String syncPage() {
-        return "syncTest";
+        return "manual_sync";
     }
 }

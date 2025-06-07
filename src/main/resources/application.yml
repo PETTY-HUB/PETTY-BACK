@@ -10,10 +10,10 @@ spring:
 
 logging:
   level:
-    io.github.petty: DEBUG
-    org.springframework.web: INFO
-    software.amazon.awssdk: INFO
-    com.google.cloud: INFO
+    io.github.petty: ERROR
+    org.springframework.web: ERROR
+    software.amazon.awssdk: ERROR
+    com.google.cloud: ERROR
 
 server:
   forward-headers-strategy: FRAMEWORK

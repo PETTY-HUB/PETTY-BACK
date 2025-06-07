@@ -160,29 +160,6 @@
     box-shadow: 0 0 0 0.25rem rgba(var(--accent-color-rgb), .25);
 }
 
-/* 네비게이션 탭 (Nav Tabs) */
-.nav-tabs {
-    --bs-nav-tabs-border-color: var(--input-border-color);
-    --bs-nav-tabs-link-hover-border-color: var(--input-border-color) var(--input-border-color) var(--point-color);
-    --bs-nav-tabs-link-active-color: var(--accent-color);
-    --bs-nav-tabs-link-active-bg: var(--card-bg-color);
-    --bs-nav-tabs-link-active-border-color: var(--input-border-color) var(--input-border-color) var(--card-bg-color);
-}
-
-.nav-link {
-    color: var(--secondary-text-color);
-    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 탭 링크에도 폰트 적용 */
-}
-
-.nav-link:hover, .nav-link:focus {
-    color: var(--point-color);
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--accent-color); /* 활성 탭 텍스트 색상 명확히 */
-    font-weight: bold;
-}
-
 
 /* 카드 (Cards) */
 .card {

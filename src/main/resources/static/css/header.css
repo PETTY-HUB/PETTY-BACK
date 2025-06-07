@@ -31,24 +31,49 @@ header {
 }
 
 header h1 {
-    color: var(--accent-color);
     font-size: 1.8em;
     margin: 0;
 }
 
-header a {
+/* 1. 로고(PETTY) 링크 스타일 */
+.logo-container h1 a {
+    color: var(--accent-color); /* common.css에 정의된 분홍색 변수 */
     text-decoration: none;
-    color: var(--secondary-text-color);
-    font-weight: bold;
-    padding: 8px 12px;
-    border-radius: var(--border-radius-md);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    /* 로고는 호버 효과가 없어야 하므로 padding, background 등을 초기화합니다. */
+    padding: 0;
+    border-radius: 0;
+}
+.logo-container h1 a:hover {
+    background-color: transparent; /* 호버 시 배경색 변경 없음 */
+    color: var(--accent-color); /* 호버 시 색상 변경 없음 */
 }
 
-header a:hover {
-    background-color: var(--point-color);
-    color: white;
+
+/* 2. 우측 계정 메뉴(프로필, 로그아웃) 스타일 */
+.account-btn-div a {
+    color: var(--text-color); /* common.css에 정의된 기본 텍스트 색상(갈색 계열) */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1em; /* 폰트 크기 통일 */
+    padding: 8px 12px;
+    border-radius: var(--border-radius-md);
+    transition: color 0.3s ease;
 }
+.account-btn-div a:hover {
+    color: var(--accent-color); /* 호버 시 분홍색으로 변경 */
+    background-color: transparent; /* 호버 시 배경색은 없도록 처리 */
+}
+
+
+/* 3. 사용자 이름 텍스트 스타일 */
+#userInfo {
+    color: var(--text-color);
+    font-weight: bold;
+    font-size: 1em;
+    padding: 8px 12px; /* 링크와 여백을 맞추기 위해 추가 */
+}
+
+
 
 /* Menu Icon (Hamburger) Styles */
 .menu-icon {
@@ -90,7 +115,7 @@ header a:hover {
         font-size: 1.5em;
     }
 
-    header div[style] { /* 로그인/회원가입 메뉴 숨김 */
+    header .account-btn-div { /* 로그인/회원가입 메뉴를 감싸는 div를 숨김 */
         display: none !important;
     }
 }
