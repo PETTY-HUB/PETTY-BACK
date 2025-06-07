@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
+<head>
+    <title>페이지를 찾을 수 없습니다</title>
+    <th:block layout:fragment="css">
+        <style>
+            .error-container {
+                text-align: center;
+                padding: 50px 20px;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .error-code {
+                font-size: 8rem;
+                font-weight: bold;
+                margin: 0;
+                background: linear-gradient(45deg, var(--accent-color), var(--point-color));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .error-title {
+                font-size: 2rem;
+                color: var(--text-color);
+                margin: 20px 0;
+                font-weight: 600;
+            }
+
+            .error-message {
+                font-size: 1.2rem;
+                color: var(--secondary-text-color);
+                margin-bottom: 30px;
+                line-height: 1.6;
+            }
+
+            .error-actions {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin-top: 40px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border-radius: 30px;
+                font-size: 1rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: none;
+                font-family: inherit;
+                display: inline-block;
+            }
+
+            .btn-primary {
+                background-color: var(--accent-color);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background-color: var(--button-hover-color);
+                transform: translateY(-2px);
+                box-shadow: var(--box-shadow-cute);
+            }
+
+            .btn-secondary {
+                background-color: var(--point-color);
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background-color: #8fa97a;
+                transform: translateY(-2px);
+            }
+
+            .cute-illustration {
+                font-size: 4rem;
+                margin: 30px 0;
+                opacity: 0.8;
+            }
+
+            .search-suggestion {
+                background-color: var(--card-bg-color);
+                border-radius: var(--border-radius-lg);
+                padding: 25px;
+                margin: 30px 0;
+                box-shadow: var(--box-shadow-light);
+            }
+
+            .search-suggestion h3 {
+                color: var(--accent-color);
+                margin-bottom: 15px;
+                font-size: 1.3rem;
+            }
+
+            .quick-links {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .quick-link {
+                display: block;
+                padding: 15px;
+                background-color: rgba(158, 188, 138, 0.1);
+                border-radius: var(--border-radius-md);
+                text-decoration: none;
+                color: var(--text-color);
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+            }
+
+            .quick-link:hover {
+                background-color: var(--point-color);
+                color: white;
+                transform: translateY(-2px);
+                border-color: var(--accent-color);
+            }
+
+            .quick-link .icon {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            .quick-link .title {
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .quick-link .desc {
+                font-size: 0.9rem;
+                opacity: 0.8;
+            }
+
+            @media (max-width: 768px) {
+                .error-code {
+                    font-size: 6rem;
+                }
+
+                .error-title {
+                    font-size: 1.5rem;
+                }
+
+                .error-message {
+                    font-size: 1rem;
+                }
+
+                .error-actions {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 100%;
+                    max-width: 250px;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <main>
+        <div class="error-container">
+            <div class="error-code">404</div>
+            <h1 class="error-title">페이지를 찾을 수 없습니다</h1>
+            <div class="cute-illustration">🐕‍🦺 🔍</div>
+            <p class="error-message">
+                앗! 우리 반려동물이 길을 잃었나봐요.<br>
+                요청하신 페이지를 찾을 수 없습니다.
+            </p>
+        </div>
+    </main>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script>
+        // 페이지 로드 시 귀여운 애니메이션 효과
+        document.addEventListener('DOMContentLoaded', function() {
+            const illustration = document.querySelector('.cute-illustration');
+            if (illustration) {
+                illustration.style.opacity = '0';
+                illustration.style.transform = 'scale(0.8)';
+
+                setTimeout(() => {
+                    illustration.style.transition = 'all 0.5s ease';
+                    illustration.style.opacity = '0.8';
+                    illustration.style.transform = 'scale(1)';
+                }, 200);
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

@@ -19,31 +19,6 @@
   color: var(--secondary-text-color); /* common.css 변수 사용 */
 }
 
-/* ==========================================================================
-   탭 UI (직접 검색)
-   ========================================================================== */
-.nav-tabs {
-  border-bottom-color: var(--input-border-color); /* common.css 변수 */
-}
-.nav-tabs .nav-link {
-  font-weight: bold;
-  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* common.css 변수 */
-  padding: 0.75rem 1.25rem;
-  background-color: transparent;
-  /* bootstrap-overrides.css 에서 :root 및 .nav-link 로 색상 관리 */
-  /* border-color 는 bootstrap-overrides.css 의 --bs-nav-tabs-link-active-border-color 등 변수 설정 따름 */
-}
-/* .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus handled by bootstrap-overrides.css */
-/* .nav-tabs .nav-link.active handled by bootstrap-overrides.css */
-
-.tab-content > .tab-pane {
-  background-color: var(--card-bg-color); /* common.css 변수 */
-  border: 1px solid var(--input-border-color); /* common.css 변수 */
-  border-top: none;
-  padding: 1.5rem;
-  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); /* common.css 변수 */
-  box-shadow: var(--box-shadow-light); /* common.css 변수 */
-}
 
 /* ==========================================================================
    직접 검색 필터 (폼 요소 공통 스타일)
@@ -140,7 +115,6 @@
 
 /* --- 직접 검색 결과 리스트 컨트롤 --- */
 #resultControlsDirectSearch {
-  background-color: var(--bs-light-bg-subtle, var(--background-color)); /* common.css 변수 fallback */
   padding: 1rem 1.5rem;
   border-radius: var(--border-radius-md); /* common.css 변수 */
   margin-bottom: 1.5rem;
@@ -158,7 +132,6 @@
   font-size: 0.95em;
   padding: 0.5em 0.75em;
   color: var(--text-color); /* primary 버튼 텍스트 색상 */
-  background-color: var(--accent-color); /* common.css 변수, Bootstrap primary 대신 테마색 사용 */
   /* bootstrap-overrides.css의 --bs-primary 가 이미 --accent-color로 설정되어 있다면, badge bg-primary로도 충분 */
 }
 
