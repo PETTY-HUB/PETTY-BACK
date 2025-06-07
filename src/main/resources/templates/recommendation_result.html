@@ -3,120 +3,112 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <title>추천 여행지</title> <th:block layout:fragment="css">
-    <style>
-        /* 추천 여행지 카드 스타일 */
-        .recommendation-card {
-            background: var(--card-bg-color);
-            padding: 20px;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--box-shadow-light);
-            margin-bottom: 25px; /* 카드 간 간격 */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex; /* 이미지와 텍스트를 가로로 배치 */
-            align-items: flex-start; /* 상단 정렬 */
-            gap: 20px; /* 이미지와 텍스트 간 간격 */
-        }
+    <title>추천 여행지</title>
+    <th:block layout:fragment="css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}" />
+        <link rel="stylesheet" th:href="@{/css/search.css}" />
+        <style>
+            /* search.css의 petty-list-item 스타일을 따르므로, 여기서는 최소한의 조정만 필요할 수 있습니다. */
+            /* 예를 들어, 추천 이유 텍스트 스타일 등 */
+            .petty-list-item-reason {
+                font-size: 0.9em;
+                color: var(--secondary-text-color); /* common.css 변수 사용 */
+                /* white-space: pre-line; */ /* 추천 이유가 여러 줄일 경우 */
+            }
 
-        .recommendation-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-cute);
-        }
+            .petty-list-item-reason i {
+                color: var(--point-color); /* 아이콘 색상 */
+            }
 
-        .recommendation-card .place-image {
-            width: 150px; /* 이미지 너비 고정 */
-            height: 150px; /* 이미지 높이 고정 */
-            object-fit: cover; /* 이미지 비율 유지 및 잘라내기 */
-            border-radius: var(--border-radius-md); /* 둥근 모서리 */
-            flex-shrink: 0; /* 내용이 많아도 이미지가 줄어들지 않도록 */
-            border: 2px solid var(--input-border-color);
-        }
-
-        .recommendation-card .place-details {
-            flex-grow: 1; /* 남은 공간 모두 사용 */
-        }
-
-        .recommendation-card h3 {
-            color: var(--point-color);
-            font-size: 1.6em;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-
-        .recommendation-card p {
-            color: var(--secondary-text-color);
-            font-size: 1em;
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .recommendation-card p strong {
-            color: var(--text-color);
-        }
-
-        /* 이미지가 없을 때 대체 스타일 (선택 사항) */
-        .no-image-placeholder {
-            width: 150px;
-            height: 150px;
-            border-radius: var(--border-radius-md);
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #ccc;
-            font-size: 0.9em;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        /* 카드 링크 스타일 추가 */
-        .card-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .card-link:hover {
-            text-decoration: none;
-            color: inherit;
-        }
-    </style>
-</th:block>
+            /* 이미지가 없을 때를 위한 플레이스홀더 스타일 (search.css 와 유사하게 또는 공통화) */
+            .petty-list-item-img-placeholder {
+                width: 180px;
+                height: 100%;
+                background-color: #f0f0f0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #ccc;
+                font-size: 0.9em;
+                text-align: center;
+                border-top-left-radius: var(--border-radius-md);
+                border-bottom-left-radius: var(--border-radius-md);
+            }
+        </style>
+    </th:block>
 </head>
 <body>
 <th:block layout:fragment="content">
-    <main>
-        <h1>🐾 추천 여행지</h1>
+    <main> <h1>🐾 추천 여행지</h1>
 
-        <div class="result-block" th:if="${recommendation}">
-            <h2>추천 여행지 리스트</h2>
-            <div th:each="place : ${recommendation.recommend}">
-                <a th:href="@{'/recommend/detail/' + ${place.contentId}}" class="card-link">
-                    <div class="recommendation-card">
-                        <img th:if="${place.imageUrl}" th:src="${place.imageUrl}" alt="여행지 이미지" class="place-image" />
-                        <div th:unless="${place.imageUrl}" class="no-image-placeholder">이미지 없음</div>
-
-                        <div class="place-details">
-                            <h3 th:text="${place.title}"></h3>
-                            <p><strong>주소:</strong> <span th:text="${place.addr}"></span></p>
-                            <p><strong>추천 이유:</strong> <span th:text="${place.recommendReason}"></span></p>
-                            <p><strong>가능 동물:</strong> <span th:text="${place.acmpyPsblCpam ?: '정보 없음'}"></span></p>
-                            <p><strong>동반 유형:</strong> <span th:text="${place.acmpyTypeCd ?: '정보 없음'}"></span></p>
-                            <p><strong>준비물:</strong> <span th:text="${place.acmpyNeedMtr ?: '정보 없음'}"></span></p>
-                        </div>
-                    </div>
-                </a>
+        <div class="mb-3 bg-light p-3 rounded shadow-sm" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span class="fw-bold me-2">추천 결과:</span>
+                <span id="resultCountDirectSearch" class="badge bg-primary" th:text="${recommendation != null and recommendation.recommend != null ? #lists.size(recommendation.recommend) : 0}">0</span> 건
             </div>
         </div>
 
-        <div class="result-block" th:if="${error}">
-            <h2>오류 발생</h2>
-            <p th:text="${error}" style="color: red;"></p>
+        <div class="row g-3" th:if="${recommendation != null and recommendation.recommend != null and not #lists.isEmpty(recommendation.recommend)}">
+            <div th:each="place : ${recommendation.recommend}" class="col-12">
+                <div class="petty-list-item d-flex mb-3">
+                    <div class="petty-list-item-img-wrapper">
+                        <img th:if="${place.imageUrl}" th:src="${place.imageUrl}" th:alt="${place.title}" class="petty-list-item-img"
+                             onerror="this.onerror=null; this.src='/assets/noimg.png';" />
+                        <div th:unless="${place.imageUrl}" class="petty-list-item-img-placeholder">
+                            이미지 없음
+                        </div>
+                    </div>
+                    <div class="petty-list-item-content flex-grow-1">
+                        <div>
+                            <h5 class="petty-list-item-title mb-1">
+                                <a th:href="@{'/contents/' + ${place.contentId}}" target="_blank" class="text-decoration-none" th:text="${place.title}">
+                                    여행지 이름
+                                </a>
+                            </h5>
+                            <p class="petty-list-item-addr small text-muted mb-2" th:text="${place.addr}">주소</p>
+                            <p th:if="${place.recommendReason}" class="petty-list-item-reason small mb-2">
+                                <i class="bi bi-quote me-1"></i>
+                                <span th:text="${place.recommendReason}">추천 이유</span>
+                            </p>
+                        </div>
+                        <div class="petty-list-item-tags">
+                            <span th:if="${place.acmpyPsblCpam}" class="badge bg-light text-dark border me-1 mb-1">
+                                <i class="bi bi-hearts me-1"></i>
+                                <span th:text="${place.acmpyPsblCpam}">가능 동물</span>
+                            </span>
+                            <span th:if="${place.acmpyTypeCd}" class="badge bg-light text-dark border me-1 mb-1">
+                                <i class="bi bi-check2-circle me-1"></i>
+                                <span th:text="${place.acmpyTypeCd}">동반 유형</span>
+                            </span>
+                            <span th:if="${place.acmpyNeedMtr}" class="badge bg-light text-dark border me-1 mb-1">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <span th:text="${place.acmpyNeedMtr}">준비물</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="petty-list-item-actions p-2">
+                        <a th:href="@{'/contents/' + ${place.contentId}}" target="_blank" class="btn btn-sm btn-outline-primary">상세보기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${recommendation == null or recommendation.recommend == null or #lists.isEmpty(recommendation.recommend)}"
+             class="bg-white p-4 rounded shadow-sm text-center text-muted mt-4">
+            <p class="mb-0">생성된 추천 여행지가 없습니다. 😥</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger mt-4" role="alert">
+            <h4 class="alert-heading">오류 발생</h4>
+            <p th:text="${error}"></p>
         </div>
     </main>
 </th:block>
 
 <th:block layout:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </th:block>
 </body>
 </html>

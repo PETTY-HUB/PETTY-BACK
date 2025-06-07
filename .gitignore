@@ -44,3 +44,6 @@ application-secret.yml
 
 ### Vision ###
 application-vision-only.yml
+
+### .env files ###
+.env

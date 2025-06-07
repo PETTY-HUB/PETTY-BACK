@@ -1,90 +1,272 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8" />
     <title>PETTY 게시글 상세</title>
-    <style>
-        /* 전체 디자인 시스템에서 공통 스타일 가져옴 */
-        :root {
-            /* 컬러 팔레트 */
-            --primary: #FF9933;      /* 주 브랜드 색상: 밝은 오렌지 */
-            --secondary: #66CCFF;    /* 보조 색상: 하늘색 */
-            --accent: #FF6666;       /* 강조 색상: 연한 빨강 */
-            --text-dark: #333333;    /* 어두운 텍스트 */
-            --text-medium: #666666;  /* 중간 텍스트 */
-            --text-light: #999999;   /* 밝은 텍스트 */
-            --bg-light: #F9F9F9;     /* 배경 밝은 색 */
-            --bg-white: #FFFFFF;     /* 흰색 배경 */
-            --shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+</head>
 
-            /* 동물 타입 색상 */
-            --dog: #4dabf7;          /* 강아지: 파란색 */
-            --cat: #69db7c;          /* 고양이: 연두색 */
-            --bird: #ff8787;         /* 새: 분홍색 */
-            --rabbit: #ffd43b;       /* 토끼: 노란색 */
-            --hamster: #b197fc;      /* 햄스터: 보라색 */
-            --reptile: #63e6be;      /* 파충류: 민트색 */
-            --other: #ffa94d;        /* 기타: 주황색 */
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        /* 폰트 정의 */
+        @font-face {
+            font-family: 'HakgyoansimDunggeunmisoTTF-B';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        /* CSS 변수 */
+        :root {
+            --background-color: #FFF0DC;
+            --text-color: #4B352A;
+            --point-color: #9EBC8A;
+            --accent-color: #D76C82;
+            --secondary-text-color: #7A5B4C;
+            --card-bg-color: #FFFFFF;
+            --input-border-color: #D3B8AE;
+            --button-hover-color: #c45b73;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --box-shadow-cute: 0 8px 20px rgba(215, 108, 130, 0.2);
         }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'HakgyoansimDunggeunmisoTTF-B', 'Noto Sans KR', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background-color: var(--card-bg-color);
+            box-shadow: var(--box-shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: var(--border-radius-lg);
+            border-bottom-right-radius: var(--border-radius-lg);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-container img {
+            height: 40px;
+            width: auto;
+            vertical-align: middle;
+        }
+
+        .logo-container h1 {
+            color: var(--accent-color);
+            font-size: 1.8em;
+            margin: 0;
+        }
+
+        .logo-container a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 1001;
+            position: relative;
+        }
+
+        .menu-icon span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: var(--text-color);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .account-btn-div {
+            display: flex;
+            gap: 15px;
+        }
+
+        .account-btn-div a {
+            text-decoration: none;
+            color: var(--secondary-text-color);
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .account-btn-div a:hover {
+            background-color: var(--point-color);
+            color: white;
+        }
+
+        /* 사이드 메뉴 */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 220px;
+            height: 100%;
+            background-color: var(--point-color);
+            padding-top: 80px;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 999;
+            border-top-right-radius: var(--border-radius-lg);
+            border-bottom-right-radius: var(--border-radius-lg);
+            box-sizing: border-box;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu nav {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .side-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.3s ease;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .side-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 메인 컨텐츠 */
+        main {
+            flex-grow: 1;
+            padding: 40px 25px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .container {
             max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            width: 100%;
         }
 
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--secondary-text-color);
+            font-size: 0.9em;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 게시글 카드 */
         .post-card {
-            background: var(--bg-white);
-            border-radius: 16px;
-            box-shadow: 0 4px 16px var(--shadow);
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
             overflow: hidden;
             margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-cute);
         }
 
         .post-header {
             padding: 25px 30px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            border-bottom: 1px solid var(--input-border-color);
+            position: relative;
+        }
+
+        .post-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--accent-color);
         }
 
         .post-type {
             display: inline-block;
             padding: 5px 12px;
             border-radius: 30px;
-            font-size: 12px;
+            font-size: 0.8em;
             font-weight: 600;
             color: white;
             margin-bottom: 15px;
         }
 
         .post-type[data-type="DOG"],
-        .post-type[data-type="강아지"] { background: var(--dog); }
+        .post-type[data-type="강아지"] { background: #4dabf7; }
         .post-type[data-type="CAT"],
-        .post-type[data-type="고양이"] { background: var(--cat); }
+        .post-type[data-type="고양이"] { background: #69db7c; }
         .post-type[data-type="HAMSTER"],
-        .post-type[data-type="햄스터"] { background: var(--hamster); }
+        .post-type[data-type="햄스터"] { background: #b197fc; }
         .post-type[data-type="PARROT"],
-        .post-type[data-type="앵무새"] { background: var(--bird); }
+        .post-type[data-type="앵무새"] { background: #ff8787; }
         .post-type[data-type="RABBIT"],
-        .post-type[data-type="토끼"] { background: var(--rabbit); }
+        .post-type[data-type="토끼"] { background: #ffd43b; }
         .post-type[data-type="REPTILE"],
-        .post-type[data-type="파충류"] { background: var(--reptile); }
+        .post-type[data-type="파충류"] { background: #63e6be; }
         .post-type[data-type="OTHER"],
-        .post-type[data-type="기타"] { background: var(--other); }
+        .post-type[data-type="기타"] { background: #ffa94d; }
 
         .post-title {
             margin: 0 0 15px 0;
-            font-size: 28px;
+            font-size: 2em;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--text-color);
         }
 
         .post-meta {
@@ -92,8 +274,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            color: var(--text-light);
-            font-size: 14px;
+            color: var(--secondary-text-color);
+            font-size: 0.9em;
         }
 
         .post-meta > span {
@@ -113,9 +295,9 @@
 
         .post-content p {
             margin: 0 0 16px 0;
-            font-size: 16px;
+            font-size: 1.1em;
             line-height: 1.7;
-            color: var(--text-medium);
+            color: var(--text-color);
         }
 
         .post-images {
@@ -127,8 +309,8 @@
 
         .post-images img {
             width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--box-shadow-light);
             transition: transform 0.3s ease;
         }
 
@@ -136,54 +318,57 @@
             transform: scale(1.03);
         }
 
+        .post-images.single-image-container {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+
         .single-image {
-            grid-column: 1 / -1;
             max-height: 500px;
             object-fit: contain;
+            max-width: 100%;
         }
 
         .post-info {
             margin-top: 25px;
-            background: rgba(102, 204, 255, 0.1);
-            padding: 15px 20px;
-            border-radius: 12px;
+            background: rgba(158, 188, 138, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius-md);
+            border-left: 4px solid var(--point-color);
         }
 
         .post-info p {
             margin: 8px 0;
-            font-size: 15px;
-            color: var(--text-medium);
+            font-size: 1em;
+            color: var(--text-color);
         }
 
         .post-info p strong {
             font-weight: 600;
-            color: var(--text-dark);
-            margin-right: 5px;
+            color: var(--accent-color);
+            margin-right: 8px;
         }
 
-        .post-status {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
+        .post-status { display: inline-block; padding: 2px 8px;
+                        border-radius: 15px; font-size: 0.7em;
+                        font-weight: 600; margin-left: 8px; vertical-align: middle; }
 
         .post-status.resolved {
-            background-color: rgba(105, 219, 124, 0.2);
-            color: #2b8a3e;
+            background-color: var(--point-color);
+            color: white;
         }
 
         .post-status.unsolved {
-            background-color: rgba(255, 107, 107, 0.2);
-            color: #e03131;
+            background-color: var(--accent-color);
+            color: white;
         }
 
         .action-buttons {
             display: flex;
             justify-content: space-between;
             margin: 25px 0;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .action-buttons .left-buttons,
@@ -195,14 +380,16 @@
         .btn {
             padding: 10px 20px;
             border-radius: 30px;
-            font-size: 14px;
+            font-size: 0.9em;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
-            transition: all 0.2s ease;
+            gap: 8px;
+            transition: all 0.3s ease;
             border: none;
+            font-family: inherit;
+            text-decoration: none;
         }
 
         .btn svg {
@@ -211,22 +398,23 @@
         }
 
         .btn-primary {
-            background-color: var(--primary);
+            background-color: var(--accent-color);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: #e67e00;
+            background-color: var(--button-hover-color);
             transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background-color: #f0f0f0;
-            color: var(--text-medium);
+            background-color: var(--input-border-color);
+            color: var(--secondary-text-color);
         }
 
         .btn-secondary:hover {
-            background-color: #e0e0e0;
+            background-color: var(--secondary-text-color);
+            color: white;
             transform: translateY(-2px);
         }
 
@@ -241,27 +429,42 @@
         }
 
         .btn-like {
-            background-color: #fee0e0;
-            color: #e03131;
+            background-color: rgba(215, 108, 130, 0.1);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
         }
 
         .btn-like:hover {
-            background-color: #ffc9c9;
+            background-color: var(--accent-color);
+            color: white;
         }
 
+        /* 댓글 섹션 */
         .comment-section {
-            background: var(--bg-white);
-            border-radius: 16px;
-            box-shadow: 0 4px 16px var(--shadow);
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
             padding: 25px 30px;
             margin-bottom: 50px;
+            position: relative;
+        }
+
+        .comment-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--point-color);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
         .comment-section h3 {
             margin: 0 0 20px 0;
-            font-size: 18px;
+            font-size: 1.3em;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--accent-color);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -280,36 +483,51 @@
             width: 100%;
             height: 100px;
             padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 15px;
+            border: 2px solid var(--input-border-color);
+            border-radius: var(--border-radius-md);
+            font-size: 1em;
             resize: none;
             margin-bottom: 15px;
             box-sizing: border-box;
             transition: border-color 0.2s ease;
+            font-family: inherit;
+            color: var(--text-color);
         }
 
         .comment-form textarea:focus {
-            border-color: var(--primary);
+            border-color: var(--accent-color);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(215, 108, 130, 0.2);
+        }
+
+        .comment-form textarea::placeholder {
+            color: var(--secondary-text-color);
         }
 
         .comment-form button {
-            background-color: var(--primary);
+            background-color: var(--accent-color);
             color: white;
             border: none;
             border-radius: 30px;
             padding: 10px 25px;
-            font-size: 14px;
+            font-size: 0.9em;
             font-weight: 600;
             cursor: pointer;
             float: right;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
 
         .comment-form button:hover {
-            background-color: #e67e00;
+            background-color: var(--button-hover-color);
             transform: translateY(-2px);
+        }
+
+        .comment-form button:disabled {
+            background-color: var(--input-border-color);
+            color: var(--secondary-text-color);
+            cursor: not-allowed;
+            transform: none;
         }
 
         .comment-list {
@@ -318,7 +536,7 @@
 
         .comment {
             padding: 15px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            border-bottom: 1px solid var(--input-border-color);
         }
 
         .comment:last-child {
@@ -333,17 +551,17 @@
 
         .comment-author {
             font-weight: 600;
-            color: var(--text-dark);
+            color: var(--accent-color);
         }
 
         .comment-date {
-            font-size: 12px;
-            color: var(--text-light);
+            font-size: 0.8em;
+            color: var(--secondary-text-color);
         }
 
         .comment-content {
-            color: var(--text-medium);
-            font-size: 15px;
+            color: var(--text-color);
+            font-size: 1em;
             line-height: 1.5;
             margin-bottom: 10px;
         }
@@ -357,24 +575,28 @@
         .comment-actions button {
             background: none;
             border: none;
-            font-size: 13px;
-            color: var(--text-light);
+            font-size: 0.8em;
+            color: var(--secondary-text-color);
             cursor: pointer;
-            padding: 0;
+            padding: 2px 8px;
+            border-radius: 15px;
+            transition: all 0.2s ease;
         }
 
         .comment-actions button:hover {
-            color: var(--primary);
+            color: var(--accent-color);
+            background-color: rgba(215, 108, 130, 0.1);
         }
 
         .comment-edit-form textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
+            border: 2px solid var(--input-border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9em;
             margin-bottom: 10px;
             box-sizing: border-box;
+            font-family: inherit;
         }
 
         .comment-edit-actions {
@@ -385,40 +607,41 @@
 
         .comment-edit-actions button {
             padding: 5px 12px;
-            border-radius: 5px;
-            font-size: 13px;
+            border-radius: 15px;
+            font-size: 0.8em;
             cursor: pointer;
+            border: none;
+            font-family: inherit;
         }
 
         .comment-edit-actions .btn-save {
-            background-color: var(--primary);
+            background-color: var(--accent-color);
             color: white;
-            border: none;
         }
 
         .comment-edit-actions .btn-cancel {
-            background-color: #f0f0f0;
-            color: var(--text-medium);
-            border: none;
+            background-color: var(--input-border-color);
+            color: var(--secondary-text-color);
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: var(--text-medium);
-            font-size: 14px;
-            text-decoration: none;
-            margin-bottom: 15px;
+        /* 푸터 */
+        footer {
+            background-color: var(--point-color);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: auto;
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1em;
+            line-height: 1.8;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
         }
 
-        .back-link:hover {
-            color: var(--primary);
-        }
-
-        .back-link svg {
-            width: 16px;
-            height: 16px;
+        .paw {
+            font-size: 1.3em;
+            color: var(--accent-color);
+            margin: 0 5px;
         }
 
         /* 반응형 처리 */
@@ -439,6 +662,10 @@
             .action-buttons .right-buttons {
                 justify-content: flex-start;
             }
+
+            .account-btn-div {
+                display: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -453,24 +680,23 @@
             }
         }
     </style>
-</head>
-<body>
-<div class="container">
-    <a href="javascript:history.back()" class="back-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        목록으로 돌아가기
-    </a>
+</th:block>
+<div layout:fragment="content">
+    <div class="container">
+        <a href="javascript:history.back()" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            목록으로 돌아가기
+        </a>
 
-    <main>
         <div id="postDetail">
             <!-- 게시글 내용이 AJAX로 로드됩니다 -->
             <div class="post-card">
                 <div class="post-header">
                     <span class="post-type" data-type="loading...">로딩 중...</span>
-                    <h1 class="post-title">게시글을 불러오는 중입니다...</h1>
+                    <h1 class="post-title">게시글을 불러오는 중입니다... 🐾</h1>
                     <div class="post-meta">
                             <span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -496,7 +722,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
                                 </svg>
-                                0
+                                <span id="commentCount">0</span>
                             </span>
                     </div>
                 </div>
@@ -507,10 +733,11 @@
                         <img src="/api/placeholder/400/320" alt="placeholder" class="loading-placeholder">
                     </div>
 
-                    <p>게시글 내용을 불러오는 중입니다...</p>
+                    <p>게시글 내용을 불러오는 중입니다... 잠시만 기다려 주세요! 🐕‍🦺</p>
 
                     <div class="post-info">
                         <!-- 추가 정보가 AJAX로 로드됩니다 -->
+                        <p><strong>📍 정보를 불러오는 중...</strong></p>
                     </div>
 
                     <div class="action-buttons">
@@ -548,24 +775,33 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
                 </svg>
-                댓글
+                댓글 💬
             </h3>
 
             <form id="commentForm" class="comment-form">
-                <textarea id="commentContent" placeholder="댓글을 입력해주세요"></textarea>
+                <textarea id="commentContent" placeholder="댓글을 입력해주세요 😊"></textarea>
                 <button type="submit">등록</button>
                 <div style="clear: both;"></div>
             </form>
 
             <div id="commentList" class="comment-list">
                 <!-- 댓글이 AJAX로 로드됩니다 -->
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-author">댓글을 불러오는 중...</span>
+                        <span class="comment-date">로딩중</span>
+                    </div>
+                    <div class="comment-content">댓글 데이터를 가져오고 있어요! 🐾</div>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
 </div>
 
-<script>
-    const postId = new URLSearchParams(location.search).get("id");
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const postId = new URLSearchParams(location.search).get("id");
 
     // 🔐 로그인 체크 함수 (쿠키 기반)
     function isLoggedIn() {
@@ -802,9 +1038,9 @@
         if (res.ok) {
             const result = await res.json();
             const postType = result.postType; // 🔥 서버에서 반환한 게시글 타입
-            
+
             alert("게시글이 삭제되었습니다.");
-            
+
             // 🔥 해당 카테고리 리스트로 이동
             switch(postType) {
                 case 'QNA':
@@ -891,11 +1127,11 @@
             if (!res.ok) throw new Error("댓글 등록 실패");
 
             document.getElementById("commentContent").value = "";
-            
+
             // 🔥 댓글 등록 후 즉시 화면 업데이트
             await loadComments();
             await updatePostCounts(); // 댓글 수 업데이트
-            
+
             console.log("✅ 댓글 등록 및 화면 업데이트 완료");
         } catch (err) {
             console.error("댓글 등록 실패:", err);
@@ -971,7 +1207,7 @@
             // 댓글 내의 기존 수정/삭제 버튼 숨기기
             const commentDiv = contentElement.closest(".comment");
             const actions = commentDiv.querySelector(".comment-actions");
-            if (actions) actions.style.display = "none";
+            if (actions) actions.remove();
         });
     }
 
@@ -1039,11 +1275,11 @@
             }
 
             console.log("✅ 댓글 삭제 성공, 화면 업데이트 시작");
-            
+
             // 🔥 댓글 삭제 후 즉시 화면 업데이트
             await loadComments();
             await updatePostCounts(); // 댓글 수 업데이트
-            
+
             console.log("✅ 댓글 삭제 후 화면 업데이트 완료");
         } catch (err) {
             console.error("댓글 삭제 실패:", err);
@@ -1058,19 +1294,19 @@
             if (!res.ok) return;
 
             const post = await res.json();
-            
+
             // 좋아요 수 업데이트
             const likeCountElement = document.getElementById("likeCount");
             if (likeCountElement) {
                 likeCountElement.textContent = post.likeCount || 0;
             }
-            
+
             // 댓글 수 업데이트
             const commentCountElement = document.getElementById("commentCount");
             if (commentCountElement) {
                 commentCountElement.textContent = post.commentCount || 0;
             }
-            
+
             console.log(`✅ 통계 업데이트 완료: 좋아요 ${post.likeCount}, 댓글 ${post.commentCount}`);
         } catch (err) {
             console.error("게시글 통계 업데이트 실패:", err);
@@ -1080,6 +1316,6 @@
     document.addEventListener("DOMContentLoaded", async () => {
         await fetchPostDetail();
     });
-</script>
-</body>
+    </script>
+</th:block>
 </html>

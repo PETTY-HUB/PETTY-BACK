@@ -1,89 +1,176 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
     <title>PETTY - 궁금해요! 질문답변</title>
-    <style>
-        /* 전체 디자인 시스템에서 공통 스타일 가져옴 */
-        :root {
-            /* 컬러 팔레트 */
-            --primary: #FF9933;      /* 주 브랜드 색상: 밝은 오렌지 */
-            --secondary: #66CCFF;    /* 보조 색상: 하늘색 */
-            --accent: #FF6666;       /* 강조 색상: 연한 빨강 */
-            --text-dark: #333333;    /* 어두운 텍스트 */
-            --text-medium: #666666;  /* 중간 텍스트 */
-            --text-light: #999999;   /* 밝은 텍스트 */
-            --bg-light: #F9F9F9;     /* 배경 밝은 색 */
-            --bg-white: #FFFFFF;     /* 흰색 배경 */
-            --shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+</head>
 
-            /* 동물 타입 색상 */
-            --dog: #4dabf7;          /* 강아지: 파란색 */
-            --cat: #69db7c;          /* 고양이: 연두색 */
-            --bird: #ff8787;         /* 새: 분홍색 */
-            --rabbit: #ffd43b;       /* 토끼: 노란색 */
-            --hamster: #b197fc;      /* 햄스터: 보라색 */
-            --reptile: #63e6be;      /* 파충류: 민트색 */
-            --other: #ffa94d;        /* 기타: 주황색 */
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        /* 폰트 정의 */
+        @font-face {
+            font-family: 'HakgyoansimDunggeunmisoTTF-B';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        /* CSS 변수 */
+        :root {
+            --background-color: #FFF0DC;
+            --text-color: #4B352A;
+            --point-color: #9EBC8A;
+            --accent-color: #D76C82;
+            --secondary-text-color: #7A5B4C;
+            --card-bg-color: #FFFFFF;
+            --input-border-color: #D3B8AE;
+            --button-hover-color: #c45b73;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --box-shadow-cute: 0 8px 20px rgba(215, 108, 130, 0.2);
         }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'HakgyoansimDunggeunmisoTTF-B', 'Noto Sans KR', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
+        /* 헤더 스타일 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background-color: var(--card-bg-color);
+            box-shadow: var(--box-shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: var(--border-radius-lg);
+            border-bottom-right-radius: var(--border-radius-lg);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-container h1 {
+            color: var(--accent-color);
+            font-size: 1.8em;
+            margin: 0;
+        }
+
+        .logo-container a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .menu-icon span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: var(--text-color);
+            border-radius: 2px;
+        }
+
+        .account-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .account-links a {
+            text-decoration: none;
+            color: var(--secondary-text-color);
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .account-links a:hover {
+            background-color: var(--point-color);
+            color: white;
+        }
+
+        /* 메인 컨텐츠 */
+        main {
+            flex-grow: 1;
+            padding: 40px 25px;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .header {
+        /* 게시판 헤더 */
+        .board-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
             padding-bottom: 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--input-border-color);
         }
 
-        .header h1 {
-            font-size: 28px;
+        .board-header h1 {
+            font-size: 2.5em;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--accent-color);
             margin: 0;
         }
 
-        .back-to-home:hover {
-            color: var(--primary) !important;
-        }
-
-        .header .write-btn {
-            background-color: var(--primary);
+        .write-btn {
+            background-color: var(--accent-color);
             color: white;
             border: none;
             border-radius: 30px;
-            padding: 10px 20px;
-            font-size: 15px;
+            padding: 12px 25px;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+            box-shadow: var(--box-shadow-light);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: inherit;
         }
 
-        .header .write-btn:hover {
+        .write-btn:hover {
+            background-color: var(--button-hover-color);
             transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+            box-shadow: var(--box-shadow-cute);
         }
 
         /* 레이아웃 */
-        .layout {
+        .board-layout {
             display: flex;
             gap: 30px;
         }
@@ -98,17 +185,17 @@
         }
 
         .nav-menu {
-            background: var(--bg-white);
-            border-radius: 12px;
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius-lg);
             overflow: hidden;
-            box-shadow: 0 3px 10px var(--shadow);
+            box-shadow: var(--box-shadow-light);
         }
 
         .nav-menu h2 {
-            font-size: 16px;
+            font-size: 1.2em;
             margin: 0;
             padding: 15px;
-            background-color: var(--primary);
+            background-color: var(--point-color);
             color: white;
         }
 
@@ -122,39 +209,42 @@
             display: block;
             padding: 14px 15px;
             text-decoration: none;
-            color: var(--text-dark);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            color: var(--text-color);
+            border-bottom: 1px solid var(--input-border-color);
             transition: all 0.2s ease;
         }
 
         .nav-menu li a:hover {
-            background-color: rgba(255, 153, 51, 0.1);
-            color: var(--primary);
+            background-color: var(--background-color);
+            color: var(--accent-color);
         }
 
         .nav-menu li a.active {
-            background-color: rgba(255, 153, 51, 0.2);
-            color: var(--primary);
+            background-color: rgba(215, 108, 130, 0.1);
+            color: var(--accent-color);
             font-weight: 600;
-            border-left: 3px solid var(--primary);
+            border-left: 3px solid var(--accent-color);
         }
 
         /* Q&A 게시판 스타일 */
         .board {
-            background: var(--bg-white);
-            border-radius: 12px;
-            box-shadow: 0 3px 10px var(--shadow);
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
             overflow: hidden;
         }
 
         .qna-list .qna-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
+            padding: 20px;
+            border-bottom: 1px solid var(--input-border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .qna-list .qna-item:hover {
-            background-color: rgba(0,0,0,0.02);
+            background-color: var(--background-color);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-light);
         }
 
         .qna-list .qna-header {
@@ -167,64 +257,55 @@
             display: inline-block;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.8em;
             font-weight: 600;
             color: white;
             margin-right: 10px;
         }
 
-        .qna-list .pet-type[data-type="강아지"] { background: var(--dog); }
-        .qna-list .pet-type[data-type="고양이"] { background: var(--cat); }
-        .qna-list .pet-type[data-type="햄스터"] { background: var(--hamster); }
-        .qna-list .pet-type[data-type="앵무새"] { background: var(--bird); }
-        .qna-list .pet-type[data-type="토끼"] { background: var(--rabbit); }
-        .qna-list .pet-type[data-type="파충류"] { background: var(--reptile); }
-        .qna-list .pet-type[data-type="기타"] { background: var(--other); }
+        .qna-list .pet-type[data-type="강아지"] { background: #4dabf7; }
+        .qna-list .pet-type[data-type="고양이"] { background: #69db7c; }
+        .qna-list .pet-type[data-type="햄스터"] { background: #b197fc; }
+        .qna-list .pet-type[data-type="앵무새"] { background: #ff8787; }
+        .qna-list .pet-type[data-type="토끼"] { background: #ffd43b; }
+        .qna-list .pet-type[data-type="파충류"] { background: #63e6be; }
+        .qna-list .pet-type[data-type="기타"] { background: #ffa94d; }
 
         .qna-list .status-badge {
             display: inline-block;
             padding: 3px 8px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.8em;
             font-weight: 600;
-            background: rgba(0,0,0,0.1);
-            color: var(--text-medium);
+            background: var(--input-border-color);
+            color: var(--secondary-text-color);
             margin-right: 10px;
         }
 
         .qna-list .status-badge.resolved {
-            background: rgba(105, 219, 124, 0.2);
-            color: #2b8a3e;
+            background: var(--point-color);
+            color: white;
         }
 
         .qna-list h3 {
-            font-size: 18px;
+            font-size: 1.3em;
             font-weight: 600;
             margin: 0 0 12px 0;
-        }
-
-        .qna-list h3 a {
-            color: var(--text-dark);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .qna-list h3 a:hover {
-            color: var(--primary);
+            color: var(--text-color);
         }
 
         .qna-list .content-preview {
             margin: 0 0 15px 0;
-            color: var(--text-medium);
-            font-size: 14px;
+            color: var(--secondary-text-color);
+            font-size: 0.95em;
             line-height: 1.5;
         }
 
         .qna-list .meta {
             display: flex;
             align-items: center;
-            color: var(--text-light);
-            font-size: 13px;
+            color: var(--secondary-text-color);
+            font-size: 0.9em;
         }
 
         .qna-list .meta > span {
@@ -248,29 +329,51 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            border: 1px solid #ddd;
-            background: white;
+            border: 1px solid var(--input-border-color);
+            background: var(--card-bg-color);
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-family: inherit;
+            color: var(--text-color);
         }
 
         .pagination button:hover {
-            background-color: var(--primary);
+            background-color: var(--point-color);
             color: white;
-            border-color: var(--primary);
+            border-color: var(--point-color);
         }
 
         .pagination button[disabled] {
-            background-color: var(--primary);
+            background-color: var(--point-color);
             color: white;
-            border-color: var(--primary);
+            border-color: var(--point-color);
             cursor: default;
         }
 
-        /* 미디어 쿼리 */
+        /* 푸터 */
+        footer {
+            background-color: var(--point-color);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: auto;
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1em;
+            line-height: 1.8;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .paw {
+            font-size: 1.3em;
+            color: var(--accent-color);
+            margin: 0 5px;
+        }
+
+        /* 반응형 */
         @media (max-width: 768px) {
-            .layout {
+            .board-layout {
                 flex-direction: column;
             }
 
@@ -279,40 +382,30 @@
                 margin-bottom: 20px;
             }
 
-            .qna-list .meta {
-                flex-wrap: wrap;
+            .board-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
             }
 
-            .qna-list .meta > span {
-                margin-bottom: 8px;
+            .account-links {
+                display: none;
             }
         }
     </style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="/" class="back-to-home" style="color: var(--text-medium); text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 14px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9.5L12 3L21 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M5 10.5V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                메인으로
-            </a>
-            <h1>궁금해요! 질문답변</h1>
-        </div>
-        <a href="/posts/qna/new">
-            <button class="write-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 5L18 8M13 7L5 15V18H8L16 10M13 7L16 4L18 6L15 9L13 7Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                글쓰기
-            </button>
+</th:block>
+<div layout:fragment="content">
+    <div class="board-header">
+        <h1>궁금해요! 질문답변</h1>
+        <a href="/posts/qna/new" class="write-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L18 8M13 7L5 15V18H8L16 10M13 7L16 4L18 6L15 9L13 7Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            글쓰기
         </a>
     </div>
 
-    <div class="layout">
+    <div class="board-layout">
         <div class="sidebar">
             <div class="nav-menu">
                 <h2>커뮤니티</h2>
@@ -327,7 +420,10 @@
         <div class="main-content">
             <div class="board">
                 <div class="qna-list" id="qnaList">
-                    <!-- JavaScript로 내용이 채워집니다 -->
+                    <!-- 로딩 중... -->
+                    <div style="padding: 40px; text-align: center; color: var(--secondary-text-color);">
+                        게시글을 불러오는 중...
+                    </div>
                 </div>
             </div>
 
@@ -338,7 +434,9 @@
     </div>
 </div>
 
-<script>
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
     let currentPage = 0;
     const pageSize = 9;
 
@@ -354,7 +452,7 @@
             const item = document.createElement('div');
             item.className = 'qna-item';
             item.style.cursor = 'pointer'; // 🔥 클릭 가능한 커서 표시
-            
+
             // 🔥 아이템 전체 클릭 시 상세 페이지로 이동
             item.addEventListener('click', () => {
                 window.location.href = `/posts/detail?id=${post.id}`;
@@ -466,5 +564,5 @@
     // 페이지 로드시 데이터 가져오기
     document.addEventListener('DOMContentLoaded', fetchQnaPosts);
 </script>
-</body>
+</th:block>
 </html>

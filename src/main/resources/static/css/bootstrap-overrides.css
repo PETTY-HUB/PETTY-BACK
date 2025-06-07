@@ -1,46 +1,68 @@
 /* bootstrap-overrides.css */
-/* 이 파일은 common.css에 정의된 CSS 변수를 사용하여 Bootstrap 스타일을 재정의합니다. */
-/* common.css가 이 파일보다 먼저 로드되어야 합니다. */
-
-
 
 /* 1. Bootstrap 전역 CSS 변수 재정의 */
 :root {
-    --bs-body-color: var(--text-color);
-    --bs-body-bg: var(--card-bg-color);
-    --bs-border-color: var(--input-border-color); /* 일반적인 테두리 색상 */
-    --bs-border-color-translucent: rgba(var(--text-color-rgb, 75, 53, 42), 0.175); /* --text-color 기반 */
+    /* Define RGB versions of your custom colors from common.css */
+    /* --accent-color: #D76C82; */
+    --accent-color-rgb: 215, 108, 130;
+    /* --point-color: #9EBC8A; */
+    --point-color-rgb: 158, 188, 138;
+    /* --text-color: #4B352A; */
+    --text-color-rgb: 75, 53, 42;
+    /* --secondary-text-color: #7A5B4C; */
+    --secondary-text-color-rgb: 122, 91, 76;
+    /* --card-bg-color: #FFFFFF; */
+    --card-bg-color-rgb: 255, 255, 255;
+    /* --input-border-color: #D3B8AE; */
+    --input-border-color-rgb: 211, 184, 174;
+    /* --button-hover-color: #c45b73; */
+    --button-hover-color-rgb: 196, 91, 115;
+    /* Define a hover color for point-color if not in common.css, e.g., a slightly darker version */
+    --point-hover-color: #8cb079; /* Example: Slightly darker than #9EBC8A */
+    --point-hover-color-rgb: 139, 176, 121;
+
+
+    /* --- KEY FIX FOR FONT --- */
+    --bs-body-bg: var(--background-color); /* common.css의 베이지색 배경 */
+    --bs-body-font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* common.css의 기본 폰트 */
+    --bs-body-color: var(--text-color); /* common.css의 기본 텍스트 색상 */
+    --bs-border-color: var(--input-border-color);
+    --bs-border-color-translucent: rgba(var(--text-color-rgb), 0.175);
 
     /* 테마 색상 (Primary, Secondary 등) */
     --bs-primary: var(--accent-color);
     --bs-primary-rgb: var(--accent-color-rgb);
     --bs-secondary: var(--point-color);
     --bs-secondary-rgb: var(--point-color-rgb);
-    /* 필요에 따라 --bs-success, --bs-info, --bs-warning, --bs-danger 등도 커스텀 변수에 매핑 */
-    /* 예: --bs-success: var(--point-color); --bs-success-rgb: var(--point-color-rgb); */
+    /* You can map other Bootstrap colors (success, info, warning, danger) here if needed */
+    /* Example:
+    --bs-info: var(--point-color);
+    --bs-info-rgb: var(--point-color-rgb);
+    */
 
     /* 링크 색상 */
     --bs-link-color: var(--accent-color);
     --bs-link-color-rgb: var(--accent-color-rgb);
-    --bs-link-decoration: underline;
+    --bs-link-decoration: none; /* Changed from underline to match header link style */
     --bs-link-hover-color: var(--button-hover-color);
-    --bs-link-hover-color-rgb: var(--accent-color-rgb); /* 호버 시 RGB도 필요할 수 있음 */
+    --bs-link-hover-color-rgb: var(--button-hover-color-rgb);
 
     /* 테두리 둥글기 (common.css의 값을 Bootstrap 변수에 연결) */
     --bs-border-radius: var(--border-radius-md);
     --bs-border-radius-sm: var(--border-radius-sm);
     --bs-border-radius-lg: var(--border-radius-lg);
-    --bs-border-radius-xl: var(--border-radius-lg); /* xl, xxl도 lg로 우선 매핑 */
+    --bs-border-radius-xl: var(--border-radius-lg);
     --bs-border-radius-xxl: var(--border-radius-lg);
-    --bs-border-radius-pill: var(--border-radius-lg);
+    --bs-border-radius-pill: 30px; /* common.css uses 30px for buttons */
 }
 
 /* 2. 컴포넌트별 재정의 */
 
 /* 버튼 (Buttons) */
 .btn {
-    /* 모든 .btn에 공통적으로 적용할 기본 둥글기 등 (필요시) */
-    /* border-radius: var(--bs-border-radius); */ /* 이미 :root에서 설정됨 */
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* Ensure all buttons use the theme font */
+    border-radius: 30px; /* Consistent with common.css button border-radius */
+    padding: 10px 20px; /* Adjusted for consistency, check common.css button padding */
 }
 
 .btn-primary {
@@ -51,16 +73,16 @@
     --bs-btn-hover-bg: var(--button-hover-color);
     --bs-btn-hover-border-color: var(--button-hover-color);
     --bs-btn-active-color: #fff;
-    --bs-btn-active-bg: var(--button-hover-color); /* Active 시 호버보다 더 어둡게 하려면 별도 변수 필요 */
+    --bs-btn-active-bg: var(--button-hover-color);
     --bs-btn-active-border-color: var(--button-hover-color);
     --bs-btn-disabled-color: #fff;
     --bs-btn-disabled-bg: var(--accent-color);
     --bs-btn-disabled-border-color: var(--accent-color);
-    /* 포커스 시 box-shadow 색상은 :root의 --bs-primary-rgb를 따름 */
+    --bs-btn-focus-shadow-rgb: var(--accent-color-rgb);
 }
 
 .btn-secondary {
-    --bs-btn-color: #fff; /* 또는 var(--text-color) 등 */
+    --bs-btn-color: #fff;
     --bs-btn-bg: var(--point-color);
     --bs-btn-border-color: var(--point-color);
     --bs-btn-hover-color: #fff;
@@ -72,7 +94,7 @@
     --bs-btn-disabled-color: #fff;
     --bs-btn-disabled-bg: var(--point-color);
     --bs-btn-disabled-border-color: var(--point-color);
-    /* 포커스 시 box-shadow 색상은 :root의 --bs-secondary-rgb를 따름 */
+    --bs-btn-focus-shadow-rgb: var(--point-color-rgb);
 }
 
 /* 아웃라인 버튼 (Outline Buttons) */
@@ -86,41 +108,41 @@
     --bs-btn-active-bg: var(--accent-color);
     --bs-btn-active-border-color: var(--accent-color);
     --bs-btn-disabled-color: var(--accent-color);
+    --bs-btn-disabled-bg: transparent;
     --bs-btn-disabled-border-color: var(--accent-color);
-    /* 포커스 시 box-shadow 색상은 :root의 --bs-primary-rgb를 따름 */
+    --bs-btn-focus-shadow-rgb: var(--accent-color-rgb);
 }
 
 .btn-outline-secondary {
     --bs-btn-color: var(--point-color);
     --bs-btn-border-color: var(--point-color);
-    --bs-btn-hover-color: #fff; /* 또는 var(--text-color) */
+    --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--point-color);
     --bs-btn-hover-border-color: var(--point-color);
     --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--point-color);
     --bs-btn-active-border-color: var(--point-color);
     --bs-btn-disabled-color: var(--point-color);
+    --bs-btn-disabled-bg: transparent;
     --bs-btn-disabled-border-color: var(--point-color);
-    /* 포커스 시 box-shadow 색상은 :root의 --bs-secondary-rgb를 따름 */
+    --bs-btn-focus-shadow-rgb: var(--point-color-rgb);
 }
 
 
 /* 폼 (Forms) */
 .form-control,
 .form-select {
-    background-color: var(--card-bg-color); /* 입력 필드 배경 */
+    background-color: var(--card-bg-color);
     color: var(--text-color);
-    border-color: var(--input-border-color); /* :root의 --bs-border-color가 이미 이걸로 설정됨 */
+    border-color: var(--input-border-color);
+    border-radius: var(--border-radius-sm); /* common.css 일관성 */
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 폼 요소에도 폰트 적용 */
 }
 
 .form-control:focus,
 .form-select:focus {
-    /* :root 에서 --bs-primary, --bs-primary-rgb 가 --accent-color 계열로 설정되었다면,
-       Bootstrap 기본 포커스 스타일이 이미 테마 색상을 따를 수 있습니다.
-       만약 --point-color로 포커스를 하고 싶다면 아래처럼 직접 지정합니다. */
-    border-color: var(--point-color); /* 또는 var(--accent-color) 등 원하는 포커스 테두리 색 */
-    /* box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), .25); /* :root 설정 따르기 */
-    box-shadow: 0 0 0 0.25rem rgba(var(--point-color-rgb), .25); /* --point-color 기반 그림자 */
+    border-color: var(--accent-color); /* 포커스 시 테두리 색상 변경 */
+    box-shadow: 0 0 0 0.25rem rgba(var(--accent-color-rgb), .25); /* 포커스 시 그림자 */
 }
 
 .form-check-input {
@@ -129,116 +151,98 @@
 }
 
 .form-check-input:checked {
-    background-color: var(--accent-color); /* 체크 시 배경색 */
-    border-color: var(--accent-color);    /* 체크 시 테두리 색 */
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
 }
 
 .form-check-input:focus {
-    border-color: var(--point-color); /* 또는 var(--accent-color) */
-    box-shadow: 0 0 0 0.25rem rgba(var(--point-color-rgb), .25); /* 또는 var(--accent-color-rgb) */
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--accent-color-rgb), .25);
 }
 
-/* 네비게이션 탭 (Nav Tabs from search.css, but using theme colors) */
-/* search.css의 스타일을 여기로 옮기거나, search.css에서 이 변수들을 사용하도록 수정 가능 */
-/* 여기서는 Bootstrap 변수를 직접 재정의하는 방식으로 접근 */
+/* 네비게이션 탭 (Nav Tabs) */
 .nav-tabs {
-    --bs-nav-tabs-border-color: var(--input-border-color); /* 탭 하단 테두리 */
-    --bs-nav-tabs-link-hover-border-color: var(--input-border-color) var(--input-border-color) var(--point-color); /* 호버 시 하단만 포인트 색상 */
+    --bs-nav-tabs-border-color: var(--input-border-color);
+    --bs-nav-tabs-link-hover-border-color: var(--input-border-color) var(--input-border-color) var(--point-color);
     --bs-nav-tabs-link-active-color: var(--accent-color);
-    --bs-nav-tabs-link-active-bg: var(--card-bg-color); /* 활성 탭 배경 */
-    --bs-nav-tabs-link-active-border-color: var(--input-border-color) var(--input-border-color) var(--card-bg-color); /* 활성 탭 하단 테두리 (배경과 동일하게 하여 떠있는 효과) */
+    --bs-nav-tabs-link-active-bg: var(--card-bg-color);
+    --bs-nav-tabs-link-active-border-color: var(--input-border-color) var(--input-border-color) var(--card-bg-color);
 }
-/* .nav-link 글자색은 :root의 --bs-link-color를 따를 수 있음. 필요시 .nav-link에 직접 color 지정 */
+
 .nav-link {
-    color: var(--secondary-text-color); /* 기본 탭 글자색 */
+    color: var(--secondary-text-color);
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 탭 링크에도 폰트 적용 */
 }
+
 .nav-link:hover, .nav-link:focus {
-    color: var(--point-color); /* 호버/포커스 시 글자색 */
+    color: var(--point-color);
 }
 
-
-/* 알림 (Alerts) - 예시 */
-/*
-
-.alert-primary {
-  --bs-alert-color: color-contrast(var(--accent-color)); / * Sass 함수 대신 명시적 색상 지정 필요 * /
-  --bs-alert-bg: !* --accent-color의 밝은 버전 * / ;
-  --bs-alert-border-color: !* --accent-color의 약간 어두운 버전 * /;
-  --bs-alert-link-color: !* 링크 색상 *!;
+.nav-tabs .nav-link.active {
+    color: var(--accent-color); /* 활성 탭 텍스트 색상 명확히 */
+    font-weight: bold;
 }
-.alert-success {
-    --bs-alert-color: color-contrast(var(--point-color));
-    --bs-alert-bg: !* --point-color의 밝은 버전 *!;
-    --bs-alert-border-color: !* --point-color의 약간 어두운 버전 *!;
-}
-*/
 
-/* 알림은 색상 조합(배경, 글자, 테두리)이 중요하므로, 각 테마 색상에 맞는 명확한 색상 값 필요.
-   예: --accent-color 가 #D76C82 일 때, 배경은 #F8E1E6, 글자는 #8C3F54 등으로 수동 설정 필요.
-   Bootstrap은 Sass 함수(tint-color, shade-color, color-contrast)로 이를 자동 계산함.
-   CSS 변수만으로는 이 자동 계산이 어려워 수동으로 밝은/어두운 색상을 지정해야 함.
-   우선은 버튼/폼 위주로 커버하고, 필요시 알림 추가.
-*/
-
-/* 페이지네이션 (Pagination) - 예시 */
-/*
-.pagination {
-  --bs-pagination-color: var(--accent-color);
-  --bs-pagination-hover-color: var(--button-hover-color);
-  --bs-pagination-focus-color: var(--button-hover-color);
-  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(var(--accent-color-rgb), .25);
-  --bs-pagination-active-color: #fff;
-  --bs-pagination-active-bg: var(--accent-color);
-  --bs-pagination-active-border-color: var(--accent-color);
-}
-*/
 
 /* 카드 (Cards) */
 .card {
     --bs-card-bg: var(--card-bg-color);
-    --bs-card-border-color: var(--input-border-color);
-    --bs-card-cap-bg: rgba(var(--text-color-rgb, 75, 53, 42), 0.03); /* 카드 헤더/푸터 배경 */
-    /* 기타 카드 관련 변수들... */
+    --bs-card-border-color: var(--input-border-color); /* common.css 와 일치 */
+    --bs-card-cap-bg: rgba(var(--text-color-rgb), 0.03);
+    border-radius: var(--border-radius-lg); /* common.css 와 일치 */
 }
 
-/* 드롭다운 (Dropdowns) */
-/*
-.dropdown-menu {
-  --bs-dropdown-bg: var(--card-bg-color);
-  --bs-dropdown-border-color: var(--input-border-color);
-  --bs-dropdown-link-color: var(--text-color);
-  --bs-dropdown-link-hover-color: var(--accent-color);
-  --bs-dropdown-link-hover-bg: rgba(var(--accent-color-rgb), 0.1);
-}
-*/
-
-/* 추가적으로 필요한 컴포넌트들의 Bootstrap CSS 변수를 찾아 여기에 재정의합니다. */
-
+/* 모달 (Modal) */
 .modal-content {
+    background-color: var(--card-bg-color); /* common.css 변수 사용 */
     border-radius: var(--border-radius-lg);
-    border: 1px solid var(--bs-border-color);
+    border: 1px solid var(--input-border-color);
     box-shadow: var(--box-shadow-cute);
-    background-color: var(--bs-card-bg) !important; /* 이 부분이 중요합니다! --card-bg-color (예: #FFFFFF)로 설정되어야 합니다. */
-    /* opacity: 1 !important; */ /* 강제로 불투명하게 만들고 싶다면, 하지만 보통은 background-color로 해결됩니다. */
 }
 
 .modal-header {
-    background-color: var(--bs-light-bg-subtle); /* 헤더는 약간 다른 배경일 수 있음 */
-    border-bottom: 1px solid var(--bs-border-color);
-    padding: 1.25rem 1.5rem;
+    background-color: rgba(var(--text-color-rgb), 0.03); /* 약간의 배경색, 카드캡 배경과 유사하게 */
+    border-bottom: 1px solid var(--input-border-color);
     border-top-left-radius: var(--border-radius-lg);
     border-top-right-radius: var(--border-radius-lg);
 }
 
+.modal-header .modal-title {
+    color: var(--accent-color); /* 모달 타이틀 색상 */
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
+}
+
 .modal-body {
-    padding: 1.5rem;
-    background-color: var(--card-bg-color);
+    background-color: var(--card-bg-color); /* 명시적으로 설정 */
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
 }
 
 .modal-footer {
-    background-color: var(--bs-light-bg-subtle); /* 푸터도 약간 다른 배경일 수 있음 */
-    border-top: 1px solid var(--bs-border-color);
-    padding: 1.25rem 1.5rem;
+    background-color: rgba(var(--text-color-rgb), 0.03);
+    border-top: 1px solid var(--input-border-color);
     border-bottom-left-radius: var(--border-radius-lg);
     border-bottom-right-radius: var(--border-radius-lg);
+}
+
+/* Bootstrap Badge (뱃지) */
+.badge {
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 뱃지 폰트 적용 */
+    /* 기본 뱃지 색상은 .bg-primary, .bg-secondary 등을 사용 시 Bootstrap 변수를 따름 */
+}
+
+/* Specifically target header elements if they are being reset by Bootstrap, though --bs-body-font-family should handle most cases */
+header h1, header .h1,
+header h2, header .h2,
+header h3, header .h3,
+header h4, header .h4,
+header h5, header .h5,
+header h6, header .h6,
+header a {
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif !important; /* Use !important if absolutely necessary due to Bootstrap specificity */
+}
+
+/* Ensure logo text in header also uses the correct font and color */
+header .logo-container h1 a {
+    color: var(--accent-color) !important; /* Match h1 color from common.css if it's being overridden */
+    font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif !important;
 }

@@ -6,7 +6,7 @@ spring:
     import: "optional:classpath:application-secret.yml"
 
   profiles:
-    active: dev
+    active: prod
 
 logging:
   level:
@@ -14,3 +14,6 @@ logging:
     org.springframework.web: INFO
     software.amazon.awssdk: INFO
     com.google.cloud: INFO
+
+server:
+  forward-headers-strategy: FRAMEWORK
