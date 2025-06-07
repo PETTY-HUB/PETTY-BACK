@@ -1,5 +1,6 @@
 package io.github.petty.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.petty.users.jwt.JWTFilter;
 import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.jwt.LoginFilter;
@@ -8,8 +9,10 @@ import io.github.petty.users.oauth2.OAuth2SuccessHandler;
 import io.github.petty.users.repository.UsersRepository;
 import io.github.petty.users.service.RefreshTokenService;
 import io.github.petty.users.util.CookieUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +21,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -65,12 +71,45 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/user").authenticated()
-                        .requestMatchers("/vision/**").authenticated()
+                        // 관리자 전용
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/posts/update-counts").hasRole("ADMIN")
+                        .requestMatchers("/manual-sync/**", "/embedding-batch/**").hasRole("ADMIN")
+
+                        // 인증 필요 페이지
+                        .requestMatchers("/profile/**").authenticated()
+                        .requestMatchers("/posts/detail", "/posts/*/new", "/posts/*/edit").authenticated()
                         .requestMatchers("/flow/**").authenticated()
-                        .requestMatchers("/login/**", "/oauth2/**", "/api/auth/refresh").permitAll()
+
+                        // 인증 필요
+                        .requestMatchers(HttpMethod.POST, "/api/posts").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/{id}/comments").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/comments/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/comments/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/{id}/like").authenticated()
+                        .requestMatchers("/api/images/**").authenticated()
+                        .requestMatchers("/api/users/me", "/api/check-displayname").authenticated()
+
+                        // 기본 정책
                         .anyRequest().permitAll())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String requestURI = request.getRequestURI();
+
+                            if (requestURI.startsWith("/api/")) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json;charset=UTF-8");
+
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, Object> errorResponse = Map.of("error", "로그인이 필요합니다");
+
+                                response.getWriter().write(mapper.writeValueAsString(errorResponse));
+                            } else {
+                                response.sendRedirect("/login");
+                            }
+                        }))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo
