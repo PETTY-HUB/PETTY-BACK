@@ -1,160 +1,588 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!-- src/main/resources/templates/index.html -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <title>🐶 PETTY </title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fdf7e4;
-            color: #333;
-            padding: 20px;
-        }
-        .nav {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .nav a {
-            color: #f39c12;
-            text-decoration: none;
-            margin-right: 15px;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-        .nav a:hover {
-            background-color: #f1c40f;
-            color: white;
-        }
-        .auth-menu {
-            float: right;
-        }
-        .user-info {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-        .user-info h2 {
-            color: #f39c12;
-            margin: 10px 0;
-        }
-    </style>
+    <title>PETTY - 반려동물과 함께하는 행복한 여정</title>
 </head>
 
-<body>
-<h1 th:text="${message}">PETTY에 오신 것을 환영합니다</h1>
-<h3 th:text="${error}">회원가입 에러 확인용</h3>
+<!-- 추가 CSS 스타일 -->
+<th:block layout:fragment="css">
+    <style>
+        /* 메인 페이지 전용 스타일 */
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-<div>
-    <form method="get" action="/vision/upload">
-        <button type="submit">이미지 업로드하러 가기</button>
-    </form>
-</div>
+        /* 이미지 슬라이더 - 카드 스타일 제거하고 깔끔하게 */
+        .image-slider {
+            position: relative;
+            max-width: 1200px;
+            margin: 40px auto;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+        }
 
-<div class="nav">
-    <a href="/">홈</a>
-    <a th:href="@{/posts/review}">커뮤니티</a>
-    <div class="auth-menu">
-        <span id="loginMenu" style="display: none;">
-            <a href="/login">로그인</a>
-            <a href="/join">회원가입</a>
-        </span>
-        <span id="userMenu" style="display: none;">
-            <a onclick="goToProfileEdit()">프로필 수정</a>
-            <a onclick="logout(event)">로그아웃</a>
-        </span>
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 네비게이션 점만 유지 */
+        .slider-nav {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-dot.active {
+            background: var(--accent-color);
+            transform: scale(1.3);
+            border-color: var(--accent-color);
+        }
+
+        .cta-button {
+            display: none; /* 시작하기 버튼 숨김 */
+        }
+
+        /* 서비스 섹션 개선 */
+        .services-section {
+            margin: 80px 0;
+            padding: 0 60px;
+        }
+
+        .services-title {
+            text-align: center;
+            font-size: 2.8em;
+            color: var(--point-color);
+            margin-bottom: 25px;
+        }
+
+        .services-subtitle {
+            text-align: center;
+            color: var(--secondary-text-color);
+            margin-bottom: 60px;
+            font-size: 1.2em;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 서비스 그리드 개선 - 데스크톱에서 3개 가로 배치 보장 */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            margin-top: 50px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .service-card {
+            background: var(--card-bg-color);
+            padding: 0; /* 패딩 제거 */
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            box-shadow: var(--box-shadow-light);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 320px; /* 높이 약간 증가 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 카드 호버 효과 제거 */
+        .service-card::before {
+            display: none; /* 호버 시 배경 효과 제거 */
+        }
+
+        /* 서비스 이미지 비율 고정 및 크기 통일 - 더 큰 비율 */
+        .service-image {
+            width: 100%;
+            height: 0;
+            padding-bottom: 60%; /* 16:9에서 더 큰 비율로 변경 */
+            background: var(--background-color);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; /* 상단만 둥글게 */
+            margin-bottom: 0; /* 마진 제거 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; /* 상단만 둥글게 */
+        }
+
+        /* 이미지 로딩 실패 시 아이콘 표시 */
+        .service-image .fallback-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            color: var(--secondary-text-color);
+        }
+
+        /* 카드 컨텐츠 영역 */
+        .service-content {
+            padding: 25px 30px 30px 30px; /* 상단, 좌우, 하단 패딩 */
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .service-title {
+            font-size: 1.4em;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .service-description {
+            color: var(--secondary-text-color);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            flex-grow: 1;
+        }
+
+        /* 버튼에만 애니메이션 적용 */
+        .service-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 24px;
+            border: 2px solid var(--accent-color);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-size: 1em;
+        }
+
+        .service-link:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 4px 15px rgba(215, 108, 130, 0.3);
+        }
+
+        /* 사용자 정보 카드 스타일 개선 */
+        .user-info {
+            background: var(--card-bg-color);
+            padding: 35px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
+            margin: 40px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .user-info h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .user-info p {
+            color: var(--secondary-text-color);
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        /* 반응형 디자인 개선 */
+        @media (max-width: 1024px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 40px;
+            }
+
+            .service-card:nth-child(3) {
+                grid-column: 1 / -1;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .services-section {
+                padding: 0 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .image-slider {
+                max-width: 95%;
+                margin: 30px auto;
+            }
+
+            .slider-container {
+                height: 280px;
+            }
+
+            .services-section {
+                padding: 0 40px;
+                margin: 60px 0;
+            }
+
+            .services-title {
+                font-size: 2.2em;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .service-card {
+                padding: 0;
+                min-height: auto;
+            }
+
+            .service-content {
+                padding: 20px 25px 25px 25px;
+            }
+
+            .service-card:nth-child(3) {
+                grid-column: auto;
+                max-width: none;
+            }
+
+            .service-image {
+                height: 0;
+                padding-bottom: 60%;
+            }
+
+            .service-image .fallback-icon {
+                font-size: 3.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slider-container {
+                height: 220px;
+            }
+
+            .services-section {
+                padding: 0 30px;
+            }
+
+            .services-title {
+                font-size: 1.8em;
+            }
+
+            .service-card {
+                padding: 0;
+            }
+
+            .service-content {
+                padding: 18px 20px 20px 20px;
+            }
+
+            .service-image {
+                height: 0;
+                padding-bottom: 60%;
+            }
+
+            .service-image .fallback-icon {
+                font-size: 3em;
+            }
+        }
+
+        /* 애니메이션 효과 개선 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .service-card {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .service-card:nth-child(1) { animation-delay: 0.1s; }
+        .service-card:nth-child(2) { animation-delay: 0.2s; }
+        .service-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .image-slider {
+            animation: slideIn 1s ease forwards;
+        }
+    </style>
+</th:block>
+
+<main layout:fragment="content">
+    <div class="hero-content">
+        <!-- 이미지 슬라이더 -->
+        <div class="image-slider">
+            <div class="slider-container">
+                <div class="slide active">
+                    <img src="/assets/main01.png" alt="반려동물 이미지 1">
+                </div>
+                <div class="slide">
+                    <img src="/assets/main02.png" alt="반려동물 이미지 2">
+                </div>
+            </div>
+
+            <!-- 슬라이더 네비게이션 점 -->
+            <div class="slider-nav">
+                <span class="nav-dot active" onclick="currentSlide(1)"></span>
+                <span class="nav-dot" onclick="currentSlide(2)"></span>
+            </div>
+        </div>
     </div>
-</div>
 
-<h2 th:text="${message}">index message</h2>
+    <!-- 서비스 소개 섹션 -->
+    <section class="services-section">
+        <h2 class="services-title">PETTY만의 서비스</h2>
+        <p class="services-subtitle">PETTY가 제공하는 우리 아이들을 위한 서비스를 체험해 보세요! 🐾</p>
 
-<div class="user-info" id="userInfo" style="display: none;">
-    <h2>사용자 정보</h2>
-    <p>이름: <span id="username"></span></p>
-    <p>권한: <span id="role"></span></p>
-</div>
+        <div class="services-grid">
+            <!-- 서비스 카드 1: 사진 분석 -->
+            <div class="service-card">
+                <div class="service-image">
+                    <img src="/assets/card1.jpg" alt="사진 분석 서비스"
+                         onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;fallback-icon&quot;>📷</div>';">
+                </div>
+                <div class="service-content">
+                    <h3 class="service-title">사진 분석</h3>
+                    <p class="service-description">
+                        AI가 사진을 통해 정확한 분석과 여행지를 추천해줍니다 🤖
+                    </p>
+                    <a th:href="@{/vision/upload}" class="service-link">시작하기</a>
+                </div>
+            </div>
 
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', async function() {
-        await checkLoginStatus();
-    });
+            <!-- 서비스 카드 2: 커스텀 추천 -->
+            <div class="service-card">
+                <div class="service-image">
+                    <img src="/assets/card2.jpg" alt="커스텀 추천 서비스"
+                         onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;fallback-icon&quot;>💡</div>';">
+                </div>
+                <div class="service-content">
+                    <h3 class="service-title">커스텀 검색</h3>
+                    <p class="service-description">
+                        직접 반려동물의 정보를 입력해서 추천을 받을 수 있습니다 ⌨️
+                    </p>
+                    <a th:href="@{/search}" class="service-link">검색하기</a>
+                </div>
+            </div>
 
-    // RTR 추가
-    async function checkLoginStatus() {
-        try {
-            const response = await fetch('/api/users/me');
+            <!-- 서비스 카드 3: 커뮤니티 -->
+            <div class="service-card">
+                <div class="service-image">
+                    <img src="/assets/card3.jpg" alt="커뮤니티 서비스"
+                         onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;fallback-icon&quot;>👥</div>';">
+                </div>
+                <div class="service-content">
+                    <h3 class="service-title">커뮤니티</h3>
+                    <p class="service-description">
+                        여러분의 여행이나 반려돔울을 자랑해보세요 😊
+                    </p>
+                    <a th:href="@{/posts/review}" class="service-link">참여하기</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            if (response.ok) {
-                // 성공: 로그인 상태 표시
-                const data = await response.json();
-                document.getElementById('userMenu').style.display = 'inline';
-                document.getElementById('loginMenu').style.display = 'none';
-                document.getElementById('userInfo').style.display = 'block';
-                document.getElementById('username').textContent = data.username;
-                document.getElementById('role').textContent = data.role;
-            } else if (response.status === 401) {
-                // 엑세스 토큰 만료: 자동 갱신 시도
-                console.log('액세스 토큰 만료, 리프레시 토큰으로 갱신 시도');
+    <!-- 사용자 정보 표시 영역 (로그인 시에만 표시) -->
+    <div class="user-info" id="userInfo" style="display: none;">
+        <h2>환영합니다! 🎉</h2>
+        <p><strong><span id="username"></span></strong>님, 오늘도 반려동물과 함께 행복한 하루 보내세요!</p>
+        <p>회원 등급: <span id="role"></span></p>
+    </div>
+</main>
 
-                try {
-                    const refreshResponse = await fetch('/api/auth/refresh', {
-                        method: 'POST'
-                    });
+<!-- JavaScript 로직 -->
+<th:block layout:fragment="script">
+    <script>
+        // src/main/resources/templates/index.html - JavaScript 섹션
 
-                    if (refreshResponse.ok) {
-                        console.log('토큰 갱신 성공! 원래 요청 재시도');
-                        // 토큰 갱신 성공 → 원래 요청 재시도
-                        return await checkLoginStatus();
-                    } else {
-                        console.log('리프레시 토큰도 만료, 로그인 필요');
-                        showLoginMenu();
+        // 페이지 로드 시 로그인 상태 확인
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkLoginStatus();
+            initializeAnimations();
+            initializeSlider();
+        });
+
+        // 이미지 슬라이더 관련 변수
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        // 슬라이더 초기화 - 간단한 2초 자동 슬라이드
+        function initializeSlider() {
+            setInterval(() => {
+                // 현재 활성 슬라이드 비활성화
+                slides[currentSlideIndex].classList.remove('active');
+                document.querySelectorAll('.nav-dot')[currentSlideIndex].classList.remove('active');
+
+                // 다음 슬라이드로 이동
+                currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+
+                // 새로운 슬라이드 활성화
+                slides[currentSlideIndex].classList.add('active');
+                document.querySelectorAll('.nav-dot')[currentSlideIndex].classList.add('active');
+            }, 5000); // 2초마다 슬라이드 변경
+        }
+
+        // 특정 슬라이드로 이동 (네비게이션 점 클릭용)
+        function currentSlide(slideIndex) {
+            // 현재 활성 슬라이드 비활성화
+            slides[currentSlideIndex].classList.remove('active');
+            document.querySelectorAll('.nav-dot')[currentSlideIndex].classList.remove('active');
+
+            // 새로운 슬라이드 인덱스 설정 (1-based에서 0-based로 변환)
+            currentSlideIndex = slideIndex - 1;
+
+            // 새로운 슬라이드 활성화
+            slides[currentSlideIndex].classList.add('active');
+            document.querySelectorAll('.nav-dot')[currentSlideIndex].classList.add('active');
+        }
+
+        // 사용자 로그인 상태 확인 및 UI 업데이트 (RTR 방식)
+        async function checkLoginStatus() {
+            try {
+                // 현재 사용자 정보 조회 (HttpOnly 쿠키 자동 포함)
+                const response = await fetch('/api/users/me');
+
+                if (response.ok) {
+                    // 로그인 상태: 사용자 정보 표시
+                    const data = await response.json();
+                    document.getElementById('userInfo').style.display = 'block';
+                    document.getElementById('username').textContent = data.username;
+                    document.getElementById('role').textContent = data.role;
+                } else if (response.status === 401) {
+                    // 액세스 토큰 만료: 리프레시 토큰으로 갱신 시도
+                    console.log('액세스 토큰 만료, 리프레시 토큰으로 갱신 시도');
+
+                    try {
+                        const refreshResponse = await fetch('/api/auth/refresh', {
+                            method: 'POST'
+                        });
+
+                        if (refreshResponse.ok) {
+                            console.log('토큰 갱신 성공! 원래 요청 재시도');
+                            return await checkLoginStatus(); // 재귀 호출로 다시 시도
+                        } else {
+                            console.log('리프레시 토큰도 만료, 로그인 필요');
+                            hideUserInfo();
+                        }
+                    } catch (refreshError) {
+                        console.error('토큰 갱신 실패:', refreshError);
+                        hideUserInfo();
                     }
-                } catch (refreshError) {
-                    console.error('토큰 갱신 실패:', refreshError);
-                    showLoginMenu();
+                } else {
+                    // 기타 에러
+                    hideUserInfo();
                 }
-            } else {
-                // 다른 에러
-                showLoginMenu();
+            } catch (error) {
+                console.error('사용자 정보 조회 실패:', error);
+                hideUserInfo();
             }
-        } catch (error) {
-            console.error('사용자 정보 조회 실패:', error);
-            showLoginMenu();
         }
-    }
 
-    function showLoginMenu() {
-        document.getElementById('userMenu').style.display = 'none';
-        document.getElementById('loginMenu').style.display = 'inline';
-        document.getElementById('userInfo').style.display = 'none';
-    }
+        // 사용자 정보 영역 숨기기
+        function hideUserInfo() {
+            document.getElementById('userInfo').style.display = 'none';
+        }
 
-    function goToProfileEdit() {
-        window.location.href = '/profile/edit'; // 브라우저가 쿠키를 자동으로 담아서 GET 요청을 보냄
-    }
+        // 페이지 애니메이션 초기화
+        function initializeAnimations() {
+            // 스크롤 시 요소들 페이드인 효과
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
 
-    async function logout(event) {
-        event.preventDefault();
-        try {
-            const response = await fetch('/logout', { // 서버에 로그아웃 요청
-                method: 'POST'
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // 서비스 카드들에 관찰자 등록
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(40px)';
+                card.style.transition = 'all 0.8s ease';
+                observer.observe(card);
             });
-            if (response.ok) {
-                alert('로그아웃 성공');
-                window.location.href = '/'; // 로그아웃 성공 시 메인 페이지로 이동
-            } else {
-                alert('로그아웃 실패');
-            }
-        } catch (error) {
-            console.error('로그아웃 에러:', error);
-            alert('로그아웃 중 오류가 발생했습니다.');
-        }
-    }
-</script>
 
-</body>
+            // 사용자 정보 카드에도 애니메이션 적용
+            const userInfo = document.getElementById('userInfo');
+            if (userInfo) {
+                userInfo.style.opacity = '0';
+                userInfo.style.transform = 'translateY(30px)';
+                userInfo.style.transition = 'all 0.6s ease';
+                observer.observe(userInfo);
+            }
+        }
+    </script>
+</th:block>
+
 </html>
