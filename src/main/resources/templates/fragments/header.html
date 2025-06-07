@@ -1,24 +1,107 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        /* 헤더 고정 스타일 - src/main/resources/static/css/header.css */
+        header {
+            position: fixed; /* 뷰포트에 상대적으로 고정 */
+            top: 0; /* 화면 최상단에 위치 */
+            left: 0; /* 화면 왼쪽 끝에 위치 */
+            width: 100%; /* 전체 너비 차지 */
+            background-color: white; /* 배경색 설정 (투명하지 않게) */
+            border-bottom: 1px solid #ddd; /* 하단 경계선 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 그림자 효과 */
+            z-index: 1000; /* 다른 요소들 위에 표시 */
+            padding: 10px 20px; /* 내부 여백 */
+            display: flex; /* 플렉스 레이아웃 */
+            justify-content: space-between; /* 양쪽 끝 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */
+        }
+
+        /* 메뉴 아이콘 스타일 */
+        .menu-icon {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .menu-icon span {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* 로고 컨테이너 스타일 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-container img {
+            height: 40px;
+        }
+
+        .logo-container h1 {
+            margin: 0;
+        }
+
+        .logo-container a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        /* 계정 버튼 영역 스타일 */
+        .account-btn-div {
+            display: flex;
+            gap: 15px;
+        }
+
+        .account-btn-div a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .account-btn-div a:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 본문 콘텐츠가 헤더에 가려지지 않도록 상단 여백 추가 */
+        body {
+            margin: 0;
+            padding-top: 80px; /* 헤더 높이만큼 상단 패딩 추가 */
+        }
+    </style>
+</head>
 <body>
 <header th:fragment="mainHeader">
+    <!-- 메뉴 아이콘 - toggleMenu() 함수 호출 -->
     <div class="menu-icon" onclick="toggleMenu(event)">
         <span></span>
         <span></span>
         <span></span>
     </div>
+
+    <!-- 로고 컨테이너 - 메인 페이지로 이동 링크 포함 -->
     <div class="logo-container">
         <img src="/assets/logo.png" alt="PETTY Logo">
         <h1><a th:href="@{/}">PETTY</a></h1>
     </div>
 
+    <!-- 계정 관련 버튼 영역 -->
     <div class="account-btn-div" style="display: flex; gap: 15px;">
-
+        <!-- 로그인/회원가입 메뉴 (비로그인 상태) -->
         <div id="loginMenu" style="display: none;">
             <a th:href="@{/login}">로그인</a>
             <a th:href="@{/join}">회원가입</a>
         </div>
 
+        <!-- 사용자 메뉴 (로그인 상태) -->
         <div id="userMenu" style="display: none;">
             <span id="userInfo" style="display: none;">
                 <span id="username"></span>님 <span id="role" style="display: none;"></span>
@@ -29,12 +112,12 @@
     </div>
 
     <script th:inline="javascript">
-        // 페이지 로드 시 로그인 상태 확인 함수 호출
+        // 페이지 로드 시 로그인 상태 확인 - DOMContentLoaded 이벤트 리스너
         document.addEventListener('DOMContentLoaded', async function() {
             await checkLoginStatus();
         });
 
-        // 사용자 로그인 상태 확인 및 UI 업데이트 함수
+        // 사용자 로그인 상태 확인 및 UI 업데이트 - /api/users/me 엔드포인트 호출
         async function checkLoginStatus() {
             try {
                 // 현재 사용자 정보 조회 API 호출. 이 요청에는 HttpOnly 쿠키(jwt)가 자동으로 포함됨.
@@ -87,12 +170,12 @@
             document.getElementById('userInfo').style.display = 'none';
         }
 
-        // 프로필 편집 페이지로 이동하는 함수
+        // 프로필 편집 페이지로 이동 - /profile/edit 경로
         function goToProfileEdit() {
             window.location.href = '/profile/edit'; // 브라우저가 HttpOnly 쿠키를 자동으로 담아서 GET 요청을 보냄
         }
 
-        // 로그아웃 함수
+        // 로그아웃 함수 - /logout 엔드포인트 POST 요청
         async function logout(event) {
             event.preventDefault(); // <a> 태그의 기본 동작(페이지 이동) 방지
             try {

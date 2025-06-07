@@ -212,3 +212,50 @@ footer .paw {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* 이미지 슬라이더 스타일 */
+.image-slider-container {
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-light);
+    margin-bottom: 30px;
+}
+
+.image-slider {
+    display: flex;
+    transition: transform 0.8s ease-in-out;
+}
+
+.slide {
+    min-width: 100%;
+    height: auto;
+}
+
+.slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 슬라이더 컨트롤 (선택 사항) */
+.slider-controls {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.slider-controls button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    margin: 0 10px;
+    padding: 5px 10px;
+    border-radius: var(--border-radius-sm);
+    transition: color 0.3s ease;
+}
+
+.slider-controls button:hover {
+    color: var(--accent-color);
+}
