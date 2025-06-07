@@ -683,14 +683,14 @@ function initKakaoMapOnTab(pane, mapData) {
 
         // 인포윈도우 내용 구성
         const iwContent = `
-            <div class="kakao-infowindow p-2 shadow-sm rounded" style="min-width: 200px; font-size: 0.85rem;">
-                <strong class="d-block mb-1" style="font-size: 1rem;">${mapData.title || '선택 위치'}</strong>
-                <span class="text-muted">${mapData.address || '주소 정보 없음'}</span>
-                <div class="mt-2">
-                    <a href="https://map.kakao.com/link/to/${mapData.title || '선택 위치'},${mapData.mapY},${mapData.mapX}" target="_blank" class="btn btn-sm btn-primary me-1">길찾기</a>
-                    <a href="https://map.kakao.com/link/map/${mapData.title || '선택 위치'},${mapData.mapY},${mapData.mapX}" target="_blank" class="btn btn-sm btn-secondary">큰 지도</a>
-                </div>
-            </div>`;
+    <div class="kakao-infowindow p-2 shadow-sm rounded" style="min-width: 300px;">
+        <strong class="d-block mb-1 text-center" style="font-size: 1rem;">${mapData.title || '선택 위치'}</strong>
+        <span class="text-muted d-block text-center" style="font-size: 0.85rem;">${mapData.address || '주소 정보 없음'}</span>
+        <div class="mt-2 mb-2 d-flex justify-content-center">
+            <a href="https://map.kakao.com/link/to/${mapData.title || '선택 위치'},${mapData.mapY},${mapData.mapX}" target="_blank" class="btn btn-sm btn-primary me-3">길찾기</a>
+            <a href="https://map.kakao.com/link/map/${mapData.title || '선택 위치'},${mapData.mapY},${mapData.mapX}" target="_blank" class="btn btn-sm btn-secondary">큰 지도</a>
+        </div>
+    </div>`;
         const infowindow = new kakao.maps.InfoWindow({ content: iwContent, removable: true });
         infowindow.open(kakaoMapInstance, marker); // 마커 위에 인포윈도우 표시
 
