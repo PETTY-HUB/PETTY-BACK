@@ -10,11 +10,47 @@
 
     <th:block layout:fragment="css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
         <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}"/>
-        <link rel="stylesheet" th:href="@{/css/search.css}"/>
-    </th:block>
 
+        <style>
+            .nav-tabs {
+                --bs-nav-tabs-border-color: var(--input-border-color);
+                --bs-nav-tabs-link-hover-border-color: var(--input-border-color) var(--input-border-color) var(--point-color);
+                --bs-nav-tabs-link-active-color: var(--accent-color);
+                --bs-nav-tabs-link-active-bg: var(--card-bg-color);
+                --bs-nav-tabs-link-active-border-color: var(--input-border-color) var(--input-border-color) var(--card-bg-color);
+            }
+            .tab-content > .tab-pane {
+                background-color: var(--card-bg-color); /* common.css 변수 */
+                border: 1px solid var(--input-border-color); /* common.css 변수 */
+                border-top: none;
+                padding: 1.5rem;
+                border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); /* common.css 변수 */
+                box-shadow: var(--box-shadow-light); /* common.css 변수 */
+            }
+
+            .nav-link:hover, .nav-link:focus {
+                color: var(--point-color);
+            }
+
+            .nav-tabs .nav-link.active {
+                color: var(--accent-color); /* 활성 탭 텍스트 색상 명확히 */
+                font-weight: bold;
+            }
+            #thumbnailContainer img {
+                height: 80px; /* 썸네일 이미지의 높이를 80px로 강제합니다. */
+                width: auto; /* 너비는 높이에 맞춰 자동으로 조절됩니다. */
+                border-radius: var(--border-radius-sm); /* 둥근 모서리 적용 */
+                cursor: pointer;
+                transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            }
+
+            #thumbnailContainer img:hover {
+                transform: scale(1.05); /* 마우스를 올리면 약간 커지는 효과 */
+                box-shadow: var(--box-shadow-cute);
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>

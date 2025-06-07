@@ -214,12 +214,8 @@ function loadThumbnails(firstImage, firstImage2, additionalImages) {
         addThumbnail(firstImage, (contentDetail.title || "대표") + " 이미지", firstImage, true);
     }
 
-    // 2. 보조 대표 이미지(firstImage2) 추가 (firstImage와 다르고 유효한 경우)
-    if (firstImage2 && firstImage2 !== firstImage) {
-        addThumbnail(firstImage2, (contentDetail.title || "추가") + " 이미지 1", firstImage2);
-    }
 
-    // 3. 추가 이미지 목록(additionalImagesData) 처리
+    // 2. 추가 이미지 목록(additionalImagesData) 처리
     if (additionalImages && additionalImages.length > 0) {
         additionalImages.forEach((image, index) => {
             const imgSrc = image.smallImageUrl || image.originImgUrl; // 썸네일 URL 우선, 없으면 원본 URL 사용
