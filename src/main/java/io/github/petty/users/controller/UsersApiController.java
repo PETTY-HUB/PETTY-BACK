@@ -3,7 +3,9 @@ package io.github.petty.users.controller;
 import io.github.petty.users.dto.EmailVerificationRequest;
 import io.github.petty.users.dto.RefreshTokenResponseDTO;
 import io.github.petty.users.dto.VerifyCodeRequest;
+import io.github.petty.users.entity.Users;
 import io.github.petty.users.jwt.JWTUtil;
+import io.github.petty.users.repository.UsersRepository;
 import io.github.petty.users.service.EmailService;
 import io.github.petty.users.service.RefreshTokenService;
 import io.github.petty.users.service.UserService;
@@ -29,13 +31,15 @@ public class UsersApiController {
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
     private final CookieUtils cookieUtils;
+    private final UsersRepository usersRepository;
 
-    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService, UserService userService, CookieUtils cookieUtils) {
+    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService, UserService userService, CookieUtils cookieUtils, UsersRepository usersRepository) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
         this.cookieUtils = cookieUtils;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping("/users/me")
@@ -46,8 +50,11 @@ public class UsersApiController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        Users user = usersRepository.findByUsername(auth.getName());
+
         Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("username", auth.getName());
+        // TODO: 프론트엔드에서 username 키로 displayName을 사용 중(키 이름 정리 필요)
+        userInfo.put("username", user.getDisplayName());
         userInfo.put("role", auth.getAuthorities().iterator().next().getAuthority());
 
         return ResponseEntity.ok(userInfo);
