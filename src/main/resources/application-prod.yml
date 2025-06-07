@@ -1,13 +1,131 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: none # none or valid
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${OAUTH_GITHUB_CLIENT_ID}
+            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
+          kakao:
+            client-id: ${OAUTH_KAKAO_CLIENT_ID}
+            client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
+            scope: profile_nickname
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  datasource:
+    supabase:
+      jdbc-url: ${DB_SUPABASE_URL}
+      username: ${DB_SUPABASE_USERNAME}
+      password: ${DB_SUPABASE_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 5
+
+    aiven:
+      jdbc-url: ${DB_AIVEN_URL}
+      username: ${DB_AIVEN_USERNAME}
+      password: ${DB_AIVEN_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-time: ${JWT_EXPIRATION_TIME}
+
+  docker:
+    compose:
+      enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+  ai:
+    model:
+      embedding: openai
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-3-small
+    vectorstore:
+      qdrant:
+        host: ${QDRANT_HOST}
+        port: ${QDRANT_PORT}
+        collection-name: ${QDRANT_COLLECTION}
+        use-tls: true
+        initialize-schema: true
+        api-key: ${QDRANT_API_KEY}
+
+supabase:
+  url: ${SUPABASE_URL}
+  key: ${SUPABASE_KEY}
+  bucket: ${SUPABASE_BUCKET}
+
+vision:
+  gemini:
+    url: ${GEMINI_VISION_URL}
+    key: ${GEMINI_VISION_KEY}
+  together:
+    url: ${TOGETHER_VISION_URL}
+    key: ${TOGETHER_VISION_KEY}
+
+gemini:
+  api:
+    url: ${GEMINI_CHAT_URL}
+    key: ${GEMINI_CHAT_KEY}
+
+together:
+  api:
+    model: ${TOGETHER_CHAT_MODEL}
+    url: ${TOGETHER_CHAT_URL}
+    key: ${TOGETHER_CHAT_KEY}
+
+aws:
+  region: ${AWS_REGION}
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+
+tour-api:
+  base-url: ${TOUR_API_BASE_URL}
+  serviceKey: ${TOUR_API_SERVICE_KEY}
+  defaultParams:
+    MobileOS: ${TOUR_API_MOBILE_OS}
+    MobileApp: ${TOUR_API_MOBILE_APP}
+    _type: ${TOUR_API_TYPE}
+
 security:
   cookie:
-    secure: true   # 배포환경
+    secure: true
     same-site: Lax

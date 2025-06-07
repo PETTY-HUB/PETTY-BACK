@@ -1,91 +1,547 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETTY - 자랑 게시글 작성하기</title>
-    <link rel="stylesheet" href="/css/common-styles.css">
 </head>
-<body>
-<div class="container">
-    <a href="javascript:history.back()" class="back-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        돌아가기
-    </a>
 
-    <div class="form-card">
-        <h2>우리 아이 자랑 작성하기</h2>
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        /* 폰트 정의 */
+        @font-face {
+            font-family: 'HakgyoansimDunggeunmisoTTF-B';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
 
-        <form id="showoffForm">
-            <div class="form-group">
-                <label for="showoff-title">제목 <span class="required">*</span></label>
-                <input type="text" class="input-field" id="showoff-title" name="title" placeholder="자랑글 제목을 입력해주세요" maxlength="50" required>
-            </div>
+        /* CSS 변수 */
+        :root {
+            --background-color: #FFF0DC;
+            --text-color: #4B352A;
+            --point-color: #9EBC8A;
+            --accent-color: #D76C82;
+            --secondary-text-color: #7A5B4C;
+            --card-bg-color: #FFFFFF;
+            --input-border-color: #D3B8AE;
+            --button-hover-color: #c45b73;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --box-shadow-cute: 0 8px 20px rgba(215, 108, 130, 0.2);
+        }
 
-            <div class="form-group">
-                <label>반려동물 종류 <span class="required">*</span></label>
-                <div class="radio-group">
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-dog" name="petType" value="DOG" checked>
-                        <label for="showoff-pet-dog">강아지</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-cat" name="petType" value="CAT">
-                        <label for="showoff-pet-cat">고양이</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-rabbit" name="petType" value="RABBIT">
-                        <label for="showoff-pet-rabbit">토끼</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-hamster" name="petType" value="HAMSTER">
-                        <label for="showoff-pet-hamster">햄스터</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-bird" name="petType" value="PARROT">
-                        <label for="showoff-pet-bird">앵무새</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-reptile" name="petType" value="REPTILE">
-                        <label for="showoff-pet-reptile">파충류</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" id="showoff-pet-other" name="petType" value="OTHER">
-                        <label for="showoff-pet-other">기타</label>
+        body {
+            font-family: 'HakgyoansimDunggeunmisoTTF-B', 'Noto Sans KR', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background-color: var(--card-bg-color);
+            box-shadow: var(--box-shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: var(--border-radius-lg);
+            border-bottom-right-radius: var(--border-radius-lg);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-container h1 {
+            color: var(--accent-color);
+            font-size: 1.8em;
+            margin: 0;
+        }
+
+        .logo-container a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .menu-icon span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: var(--text-color);
+            border-radius: 2px;
+        }
+
+        .account-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .account-links a {
+            text-decoration: none;
+            color: var(--secondary-text-color);
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: var(--border-radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .account-links a:hover {
+            background-color: var(--point-color);
+            color: white;
+        }
+
+        /* 메인 컨텐츠 */
+        main {
+            flex-grow: 1;
+            padding: 40px 25px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 폼 컨테이너 스타일 */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-card {
+            background: var(--card-bg-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
+            padding: 40px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-cute);
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--accent-color);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--secondary-text-color);
+            font-size: 0.9em;
+            text-decoration: none;
+            margin-bottom: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0 0 30px 0;
+            color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        /* 라벨 스타일 */
+        label {
+            display: block;
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        /* 필수 입력 필드 표시 */
+        .required {
+            color: var(--accent-color);
+            font-weight: 700;
+            margin-left: 3px;
+        }
+
+        /* 인풋 필드 스타일 */
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--input-border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 1em;
+            color: var(--text-color);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(215, 108, 130, 0.2);
+        }
+
+        .input-field::placeholder {
+            color: var(--secondary-text-color);
+        }
+
+        /* 텍스트 에어리어 스타일 */
+        textarea.input-field {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        /* 라디오 버튼 그룹 스타일 */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            position: relative;
+        }
+
+        .radio-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-item label {
+            margin: 0;
+            display: block;
+            padding: 10px 20px;
+            border: 2px solid var(--input-border-color);
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-item input[type="radio"]:checked + label {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .radio-item label:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* 이미지 업로드 영역 스타일 */
+        .upload-area {
+            border: 2px dashed var(--input-border-color);
+            border-radius: var(--border-radius-md);
+            padding: 25px;
+            text-align: center;
+            background-color: rgba(255, 240, 220, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(215, 108, 130, 0.05);
+        }
+
+        .upload-area .icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .upload-area .title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--secondary-text-color);
+            margin-bottom: 5px;
+        }
+
+        .upload-area .browse {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: 500;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area .browse:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-area .formats {
+            font-size: 0.8em;
+            color: var(--secondary-text-color);
+        }
+
+        /* 이미지 미리보기 영역 */
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--box-shadow-light);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preview-item .remove:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        /* 액션 버튼 스타일 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-cute);
+        }
+
+        .btn-secondary {
+            background-color: var(--input-border-color);
+            color: var(--secondary-text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-text-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 푸터 */
+        footer {
+            background-color: var(--point-color);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: auto;
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1em;
+            line-height: 1.8;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .paw {
+            font-size: 1.3em;
+            color: var(--accent-color);
+            margin: 0 5px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 30px 20px;
+            }
+
+            .radio-group {
+                gap: 10px;
+            }
+
+            .radio-item label {
+                padding: 8px 16px;
+                font-size: 0.8em;
+            }
+
+            .account-links {
+                display: none;
+            }
+        }
+    </style>
+</th:block>
+<div layout:fragment="content">
+    <div class="container">
+        <a href="javascript:history.back()" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            돌아가기
+        </a>
+
+        <div class="form-card">
+            <h2>우리 아이 자랑 작성하기 💖</h2>
+
+            <form id="showoffForm">
+                <div class="form-group">
+                    <label for="showoff-title">제목 <span class="required">*</span></label>
+                    <input type="text" class="input-field" id="showoff-title" name="title" placeholder="우리 아이의 매력을 한 줄로 표현해주세요!" maxlength="50" required>
+                </div>
+
+                <div class="form-group">
+                    <label>반려동물 종류 <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-dog" name="petType" value="DOG" checked>
+                            <label for="showoff-pet-dog">강아지</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-cat" name="petType" value="CAT">
+                            <label for="showoff-pet-cat">고양이</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-rabbit" name="petType" value="RABBIT">
+                            <label for="showoff-pet-rabbit">토끼</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-hamster" name="petType" value="HAMSTER">
+                            <label for="showoff-pet-hamster">햄스터</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-bird" name="petType" value="PARROT">
+                            <label for="showoff-pet-bird">앵무새</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-reptile" name="petType" value="REPTILE">
+                            <label for="showoff-pet-reptile">파충류</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="showoff-pet-other" name="petType" value="OTHER">
+                            <label for="showoff-pet-other">기타</label>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="showoff-content">자랑 내용 <span class="required">*</span></label>
-                <textarea class="input-field" id="showoff-content" name="content" placeholder="자랑하고 싶은 내용을 작성해주세요" maxlength="2000" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="showoff-imageFiles">이미지 첨부</label>
-                <label for="showoff-imageFiles" class="upload-area" id="showoff-uploadArea">
-                    <div class="icon">📷</div>
-                    <div class="title">이미지를 여기에 드래그하거나</div>
-                    <div class="browse">파일 선택하기</div>
-                    <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
-                    <input type="file" id="showoff-imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
-                </label>
-                <div class="image-preview" id="showoff-imagePreview">
-                    <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->
+                <div class="form-group">
+                    <label for="showoff-content">자랑 내용 <span class="required">*</span></label>
+                    <textarea class="input-field" id="showoff-content" name="content" placeholder="우리 아이의 특별한 점을 자랑해주세요! 어떤 재능이 있나요? 귀여운 행동이나 예쁜 모습이 있다면 마음껏 자랑하세요! 🌟" maxlength="2000" required></textarea>
                 </div>
-            </div>
 
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
-                <button type="submit" class="btn btn-primary">등록하기</button>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="showoff-imageFiles">이미지 첨부</label>
+                    <label for="showoff-imageFiles" class="upload-area" id="showoff-uploadArea">
+                        <div class="icon">📸</div>
+                        <div class="title">우리 아이의 예쁜 사진을 올려주세요!</div>
+                        <div class="browse">파일 선택하기</div>
+                        <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
+                        <input type="file" id="showoff-imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                    </label>
+                    <div class="image-preview" id="showoff-imagePreview">
+                        <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+                    <button type="submit" class="btn btn-primary">등록하기</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<script src="/js/common/form.js"></script>
-</body>
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script src="/js/common/form.js"></script>
+</th:block>
 </html>

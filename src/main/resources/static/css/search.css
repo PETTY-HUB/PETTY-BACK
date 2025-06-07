@@ -178,7 +178,7 @@
 }
 .petty-list-item-img-wrapper {
   flex: 0 0 180px;
-  max-height: 150px;
+  max-height: 100%;
   overflow: hidden;
   border-top-left-radius: var(--border-radius-md); /* 컨테이너 radius 와 일치 */
   border-bottom-left-radius: var(--border-radius-md);

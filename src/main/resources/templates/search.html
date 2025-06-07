@@ -6,13 +6,13 @@
 <head>
     <title>장소 검색</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
     <script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey='81225114d81c82c26d828099bb14b5c5', libraries='services')}"></script>
-
-    <link rel="stylesheet" th:href="@{/css/search.css}" />
-    <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}" />
+    <th:block layout:fragment="css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}"/>
+        <link rel="stylesheet" th:href="@{/css/search.css}"/>
+    </th:block>
 
 </head>
 <body>
@@ -21,33 +21,41 @@
     <div class="container mt-4">
         <ul class="nav nav-tabs nav-fill" id="mainTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#manual-search-pane" type="button" role="tab" aria-controls="manual-search-pane" aria-selected="true">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab"
+                        data-bs-target="#manual-search-pane" type="button" role="tab" aria-controls="manual-search-pane"
+                        aria-selected="true">
                     <i class="bi bi-search me-2"></i>직접 검색
                 </button>
             </li>
         </ul>
 
         <div class="tab-content mt-3" id="mainTabContent">
-            <div class="tab-pane fade show active p-md-3 p-2 bg-white rounded shadow-sm" id="manual-search-pane" role="tabpanel" aria-labelledby="search-tab">
+            <div class="tab-pane fade show active p-md-3 p-2 bg-white rounded shadow-sm" id="manual-search-pane"
+                 role="tabpanel" aria-labelledby="search-tab">
                 <div class="row">
                     <div class="col-md-4 col-lg-3 order-md-first mb-3 mb-md-0" id="manualSearchFiltersSidebar">
                         <div class="sticky-top p-3 bg-light rounded shadow-sm custom-sticky-sidebar">
                             <h2 class="mb-3 h5">조건 검색</h2>
                             <form id="directSearchForm">
-                                <hr class="my-2" />
-                                <div class="form-check form-switch mb-3"> <input class="form-check-input" type="checkbox" id="useCurrentLocationSwitch" role="switch" />
-                                    <label class="form-check-label small" for="useCurrentLocationSwitch">현재 위치 기반 검색</label>
+                                <hr class="my-2"/>
+                                <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox"
+                                                                                id="useCurrentLocationSwitch"
+                                                                                role="switch"/>
+                                    <label class="form-check-label small" for="useCurrentLocationSwitch">현재 위치 기반
+                                        검색</label>
                                 </div>
                                 <div id="locationFilterContainer">
-                                    <div id="areaSigunguFilters"> <div class="mb-2">
-                                        <label for="directSearchAreaCode" class="form-label">시/도</label>
-                                        <select class="form-select form-select-sm" id="directSearchAreaCode">
-                                            <option value="" selected>전체</option>
-                                        </select>
-                                    </div>
+                                    <div id="areaSigunguFilters">
+                                        <div class="mb-2">
+                                            <label for="directSearchAreaCode" class="form-label">시/도</label>
+                                            <select class="form-select form-select-sm" id="directSearchAreaCode">
+                                                <option value="" selected>전체</option>
+                                            </select>
+                                        </div>
                                         <div class="mb-2">
                                             <label for="directSearchSigunguCode" class="form-label">시/군/구</label>
-                                            <select class="form-select form-select-sm" id="directSearchSigunguCode" disabled>
+                                            <select class="form-select form-select-sm" id="directSearchSigunguCode"
+                                                    disabled>
                                                 <option value="" selected>전체</option>
                                             </select>
                                         </div>
@@ -55,11 +63,14 @@
 
                                     <div id="currentLocationFilters" class="d-none">
                                         <div class="mb-2">
-                                            <label for="manualLocationInput" class="form-label visually-hidden">선택된 위치</label>
-                                            <input type="text" class="form-control form-control-sm" id="manualLocationInput" placeholder="지도에서 위치 선택" readonly />
+                                            <label for="manualLocationInput" class="form-label visually-hidden">선택된
+                                                위치</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                   id="manualLocationInput" placeholder="지도에서 위치 선택" readonly/>
                                         </div>
                                         <div class="mb-2">
-                                            <label for="directSearchRadius" class="form-label">검색 반경</label> <select class="form-select form-select-sm" id="directSearchRadius">
+                                            <label for="directSearchRadius" class="form-label">검색 반경</label> <select
+                                                class="form-select form-select-sm" id="directSearchRadius">
                                             <option value="1000">1km 이내</option>
                                             <option value="3000">3km 이내</option>
                                             <option value="5000" selected>5km 이내</option>
@@ -69,20 +80,35 @@
                                         </div>
                                     </div>
                                 </div>
-                                <hr class="my-2" />
+                                <hr class="my-2"/>
                                 <div class="mb-2">
                                     <label class="form-label">카테고리</label>
                                     <div class="selectable-tag-group">
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="" id="catAll" autocomplete="off" checked /><label class="btn btn-sm btn-outline-secondary" for="catAll">전체</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="12" id="cat12" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat12">관광지</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="14" id="cat14" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat14">문화시설</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="15" id="cat15" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat15">축제</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="28" id="cat28" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat28">레포츠</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="32" id="cat32" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat32">숙박</label>
-                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="39" id="cat39" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat39">음식점</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value=""
+                                               id="catAll" autocomplete="off" checked/><label
+                                            class="btn btn-sm btn-outline-secondary" for="catAll">전체</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="12" id="cat12" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat12">관광지</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="14" id="cat14" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat14">문화시설</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="15" id="cat15" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat15">축제</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="28" id="cat28" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat28">레포츠</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="32" id="cat32" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat32">숙박</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId"
+                                               value="39" id="cat39" autocomplete="off"/><label
+                                            class="btn btn-sm btn-outline-secondary" for="cat39">음식점</label>
                                     </div>
                                 </div>
-                                <div class="mb-2" style="display:none;"> <label for="directSearchPetSize" class="form-label">펫 크기 (참고용)</label>
+                                <div class="mb-2" style="display:none;"><label for="directSearchPetSize"
+                                                                               class="form-label">펫 크기 (참고용)</label>
                                     <select class="form-select form-select-sm" id="directSearchPetSize">
                                         <option value="" selected>모든 크기</option>
                                         <option value="small">소형</option>
@@ -90,7 +116,7 @@
                                         <option value="large">대형</option>
                                     </select>
                                 </div>
-                                <hr class="my-3" />
+                                <hr class="my-3"/>
                                 <button type="submit" class="btn btn-primary btn-sm w-100" id="directSearchButton">
                                     <i class="bi bi-search me-1"></i>검색하기
                                 </button>
@@ -100,25 +126,31 @@
                     <div class="col-md-8 col-lg-9 order-md-last" id="manualSearchResultsArea">
                         <div id="spinnerDirectSearch" class="text-center" style="display: none;">
                             <div class="loading-spinner">
-                                <div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div>
+                                <div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span>
+                                </div>
                                 <p class="loading-text">검색 조건으로 장소를 찾는 중...</p>
                             </div>
                         </div>
-                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: none;">
-                            <div class="mb-2 mb-md-0"> <span class="fw-bold me-2">검색 결과:</span>
+                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm"
+                             style="display: none;">
+                            <div class="mb-2 mb-md-0"><span class="fw-bold me-2">검색 결과:</span>
                                 <span id="resultCountDirectSearch" class="badge bg-primary">0</span> 건
                             </div>
                             <div class="d-flex gap-2 flex-wrap">
-                                <select class="form-select form-select-sm" id="sortOrderDirectSearch" style="max-width: 150px; display:none;">
+                                <select class="form-select form-select-sm" id="sortOrderDirectSearch"
+                                        style="max-width: 150px; display:none;">
 
                                 </select>
-                                <button class="btn btn-sm btn-outline-secondary" id="viewMapModeDirectSearch" style="display:none;">
+                                <button class="btn btn-sm btn-outline-secondary" id="viewMapModeDirectSearch"
+                                        style="display:none;">
                                 </button>
                             </div>
                         </div>
                         <div id="directSearchResultList" class="row g-3">
                         </div>
-                        <div id="directSearchMapResultsView" class="col-12 d-none"> <div id="resultsMapDirectSearch" style="width: 100%; height: 600px; border-radius: 0.375rem"></div>
+                        <div id="directSearchMapResultsView" class="col-12 d-none">
+                            <div id="resultsMapDirectSearch"
+                                 style="width: 100%; height: 600px; border-radius: 0.375rem"></div>
                         </div>
                         <div class="text-center mt-4" id="loadMoreContainerDirectSearch" style="display: none;">
                             <button class="btn btn-outline-primary" id="loadMoreButtonDirectSearch">
@@ -141,9 +173,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex mb-3">
-                        <input type="text" class="form-control me-2" id="keywordMapInput" placeholder="장소, 주소 검색" />
+                        <input type="text" class="form-control me-2" id="keywordMapInput" placeholder="장소, 주소 검색"/>
                         <button type="button" class="btn btn-secondary text-nowrap" id="searchMapButton">
-                            <i class="bi bi-search me-1"></i>검색 </button>
+                            <i class="bi bi-search me-1"></i>검색
+                        </button>
                     </div>
                     <div id="map" class="map-container rounded" style="height: 400px"></div>
                 </div>

@@ -158,6 +158,26 @@
                 margin: 1rem 0;
                 font-weight: 500;
             }
+            /* 비활성화된 폼 스타일 */
+            .disabled {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+
+            /* 사용량 정보 박스 스타일 개선 */
+            .alert-info {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: var(--border-radius-lg);
+            }
+
+            .alert-warning {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                border: none;
+                border-radius: var(--border-radius-lg);
+            }
         </style>
     </th:block>
 </head>
@@ -173,17 +193,42 @@
             <!-- 메인 폼 카드 -->
             <div class="card">
                 <div class="card-body" id="formContainer">
+                    <!-- ✅ 사용량 정보 표시 추가 -->
+                    <div th:if="${username}" class="alert alert-info text-center mb-4">
+                        <strong>🎉 안녕하세요, <span th:text="${username}"></span>님!</strong><br>
+                        <span th:if="${canUse}">
+                오늘 <strong th:text="${remainingUsage}"></strong>회 더 분석하실 수 있습니다.
+                (총 <span th:text="${dailyLimit}"></span>회 중 <span th:text="${dailyLimit - remainingUsage}"></span>회 사용됨)
+            </span>
+                        <span th:unless="${canUse}" class="text-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                오늘의 분석 한도(<span th:text="${dailyLimit}"></span>회)를 모두 사용하셨습니다.<br>
+                내일 다시 이용해주세요! 🐾
+            </span>
+                    </div>
+
+                    <!-- ✅ 로그인하지 않은 경우 안내 -->
+                    <div th:unless="${username}" class="alert alert-warning text-center mb-4">
+                        <i class="bi bi-lock"></i>
+                        <strong>Vision 분석 기능을 이용하려면 로그인이 필요합니다.</strong><br>
+                        <a href="/login" class="btn btn-primary btn-sm mt-2">로그인하기</a>
+                    </div>
+
                     <h3 class="text-center mb-4">🐾 반려동물 정보를 입력하세요</h3>
-                    <form id="visionForm">
+
+                    <!-- ✅ 사용량 초과 시 폼 비활성화 -->
+                    <form id="visionForm" th:classappend="${!canUse} ? 'disabled' : ''">
                         <div class="mb-3">
                             <label for="petName" class="form-label">반려동물 이름</label>
                             <input type="text" class="form-control" name="petName" id="petName"
-                                   placeholder="반려동물의 이름을 입력하세요" required />
+                                   placeholder="반려동물의 이름을 입력하세요"
+                                   th:disabled="${!canUse}" required />
                         </div>
                         <div class="mb-3">
                             <label for="file" class="form-label">이미지 선택</label>
                             <input type="file" class="form-control" name="file" id="file"
-                                   accept="image/jpeg,image/jpg,image/png" required />
+                                   accept="image/jpeg,image/jpg,image/png"
+                                   th:disabled="${!canUse}" required />
                             <small class="text-muted">⚠️ JPEG, PNG 형식만 지원합니다 (최대 5MB)</small>
                         </div>
                         <!-- 이미지 미리보기 -->
@@ -191,12 +236,15 @@
                             <img id="previewImg" src="" alt="미리보기" class="img-fluid rounded" />
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">분석하기</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn"
+                                    th:disabled="${!canUse}">
+                                <span th:if="${canUse}">분석하기</span>
+                                <span th:unless="${canUse}">사용량 초과</span>
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
-
             <!-- 로딩 스피너 -->
             <div id="spinnerContainer" class="text-center mt-3" style="display: none">
                 <div class="spinner-border" role="status">
@@ -255,87 +303,26 @@
         const previewImg = document.getElementById('previewImg');
         const errorMessage = document.getElementById('errorMessage');
         const offlineAlert = document.getElementById('offlineAlert');
-
-        // 오프라인 상태 감지
-        function updateOnlineStatus() {
-            offlineAlert.style.display = navigator.onLine ? 'none' : 'block';
-        }
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        updateOnlineStatus();
-
-        // 파일 선택 시 미리보기 및 검증
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                imagePreview.style.display = 'none';
-                return;
-            }
-
-            // 파일 형식 검증
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-            if (!validTypes.includes(file.type)) {
-                alert('AWS Rekognition은 JPEG, PNG 형식만 지원합니다.');
-                fileInput.value = '';
-                imagePreview.style.display = 'none';
-                return;
-            }
-
-            // 파일 크기 검증 (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('파일 크기는 5MB 이하여야 합니다.');
-                fileInput.value = '';
-                imagePreview.style.display = 'none';
-                return;
-            }
-
-            // 미리보기 표시
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                imagePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // 인증된 fetch 함수
-        async function authenticatedFetch(url, options = {}) {
-            try {
-                let response = await fetch(url, {
-                    ...options,
-                    credentials: 'include'
-                });
-
-                if (response.status !== 401) {
-                    return response;
-                }
-
-                // 401 응답 시 토큰 갱신 시도
-                console.log('토큰 갱신 시도...');
-                const refreshResponse = await fetch('/api/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-
-                if (!refreshResponse.ok) {
-                    window.location.href = '/login';
-                    throw new Error('세션 만료');
-                }
-
-                // 원래 요청 재시도
-                return await fetch(url, {
-                    ...options,
-                    credentials: 'include'
-                });
-
-            } catch (error) {
-                console.error('인증 처리 오류:', error);
-                throw error;
-            }
-        }
+        const isLoggedIn = /*[[${username != null} ? 'true' : 'false']]*/ 'false';
+        const canUse = /*[[${canUse} ? 'true' : 'false']]*/ 'false';
+        const remainingUsage = /*[[${remainingUsage}]]*/ 0;
 
         form.addEventListener('submit', async e => {
             e.preventDefault();
+
+            // 로그인 체크
+            if (isLoggedIn !== 'true') {
+                if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                    window.location.href = '/login';
+                }
+                return;
+            }
+
+            // 사용량 체크
+            if (!canUse) {
+                alert('오늘의 분석 한도를 초과했습니다. 내일 다시 이용해주세요!');
+                return;
+            }
 
             // 오프라인 체크
             if (!navigator.onLine) {
@@ -369,6 +356,11 @@
                 });
 
                 if (!res1.ok) {
+                    if (res1.status === 401) {
+                        alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                        window.location.href = '/login';
+                        return;
+                    }
                     throw new Error('종 분석에 실패했습니다.');
                 }
 
@@ -389,13 +381,24 @@
             }
 
             try {
-                // 두 번째 분석 (OpenAI) - 백그라운드에서 실행
+                // 두 번째 분석 (Vision)
                 const res2 = await authenticatedFetch('/vision/analyze', {
                     method: 'POST',
                     body: fd
                 });
 
                 if (!res2.ok) {
+                    if (res2.status === 401) {
+                        alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                        window.location.href = '/login';
+                        return;
+                    } else if (res2.status === 429) {
+                        const errorText = await res2.text();
+                        alert(errorText);
+                        // 페이지 새로고침하여 사용량 정보 업데이트
+                        window.location.reload();
+                        return;
+                    }
                     throw new Error('최종 분석에 실패했습니다.');
                 }
 
@@ -422,6 +425,14 @@
                 errorMessage.textContent = '분석 중 오류가 발생했습니다: ' + e.message;
                 errorMessage.style.display = 'block';
                 console.error(e);
+            }
+
+            function authenticatedFetch(url, options) {
+                // 항상 쿠키(JWT 포함)도 함께 보냄
+                return fetch(url, {
+                    ...options,
+                    credentials: 'include'
+                });
             }
         });
     </script>
