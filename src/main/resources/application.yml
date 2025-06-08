@@ -6,7 +6,7 @@ spring:
     import: "optional:classpath:application-secret.yml"
 
   profiles:
-    active: dev
+    active: prod
 
 logging:
   level:
