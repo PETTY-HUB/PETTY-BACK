@@ -39,6 +39,7 @@ import java.util.Map;
         basePackages = {
                 "io.github.petty.users.repository",
                 "io.github.petty.community.repository",
+                "io.github.petty.vision.repository"
         },
         entityManagerFactoryRef = "supabaseEntityManagerFactory",
         transactionManagerRef = "supabaseTransactionManager"
@@ -74,7 +75,8 @@ public class SupabaseDataSourceConfig {
         return builder.dataSource(dataSource)
                 .packages(
                         "io.github.petty.users.entity",
-                        "io.github.petty.community.entity"
+                        "io.github.petty.community.entity",
+                        "io.github.petty.vision.entity"
                 ).persistenceUnit("supabase") // 중복 X
                 .properties(jpaProperties) // 대소문자 구분 X
                 .build();
