@@ -728,10 +728,6 @@
                 </div>
 
                 <div class="post-content">
-                    <div class="post-images">
-                        <!-- 이미지가 AJAX로 로드됩니다 -->
-                        <img src="/api/placeholder/400/320" alt="placeholder" class="loading-placeholder">
-                    </div>
 
                     <p>게시글 내용을 불러오는 중입니다... 잠시만 기다려 주세요! 🐕‍🦺</p>
 
@@ -837,7 +833,7 @@
             const currentUser = await getCurrentUser();
             const loggedIn = !!currentUser;  // getCurrentUser 결과로 로그인 상태 판단
 
-            const isOwner = currentUser && (currentUser.username === post.userName);
+            const isOwner = currentUser && (currentUser.username === post.writer);
             const container = document.getElementById("postDetail");
 
             let petTypeLabel = '';
@@ -1159,8 +1155,7 @@
                 div.className = "comment";
 
                 // 🔐 댓글 작성자 본인인지 확인
-                const isCommentOwner = currentUser &&
-                    (currentUser.username === comment.userName);
+                const isCommentOwner = currentUser && (currentUser.username === comment.writer);
 
                 // 🔐 댓글 작성자에게만 수정/삭제 버튼 표시
                 const commentActionsHtml = isCommentOwner ? `

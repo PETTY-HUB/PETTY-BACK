@@ -188,7 +188,7 @@ async function checkPostOwnership() {
         }
 
         // 🔐 작성자 본인이 아니면 접근 차단
-        const isOwner = currentUser.username === post.userName;
+        const isOwner = currentUser.username === post.writer;
         if (!isOwner) {
             alert("본인이 작성한 게시글만 수정할 수 있습니다.");
             window.location.replace(`/posts/detail?id=${postId}`);

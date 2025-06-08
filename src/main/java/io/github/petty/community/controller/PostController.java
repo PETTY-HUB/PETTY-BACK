@@ -97,17 +97,4 @@ public class PostController {
             return ResponseEntity.status(500).body("좋아요 처리에 실패했습니다.");
         }
     }
-    
-    // 🔥 기존 데이터 업데이트를 위한 임시 엔드포인트 (관리자용)
-    @PostMapping("/update-counts")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateAllPostCounts(@AuthenticationPrincipal CustomUserDetails userDetails) {
-            // 관리자 권한 확인
-            if (!userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                return ResponseEntity.status(403).body("관리자 권한이 필요합니다.");
-                }
-        postService.updateAllPostCounts();
-        return ResponseEntity.ok(Map.of("message", "모든 게시글의 댓글 수와 좋아요 수가 업데이트되었습니다."));
-    }
 }
