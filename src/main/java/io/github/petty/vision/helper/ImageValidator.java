@@ -32,11 +32,16 @@ public class ImageValidator {
     );
     private static final long MIN_FILE_SIZE = 10 * 1024;        // 10KB
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    private static final int MIN_WIDTH = 200;
-    private static final int MIN_HEIGHT = 200;
-    private static final float MIN_ANIMAL_CONFIDENCE = 70.0f;
+
+    // 🔥 해상도 제한 대폭 완화
+    private static final int MIN_WIDTH = 50;   // 200 → 50으로 완화
+    private static final int MIN_HEIGHT = 50;  // 200 → 50으로 완화
+
+    // 🔥 동물 감지 요구사항 완화
+    private static final float MIN_ANIMAL_CONFIDENCE = 50.0f; // 70 → 50으로 완화
     private static final Set<String> ANIMAL_LABELS = new HashSet<>(
-            Arrays.asList("Animal", "Pet", "Dog", "Cat", "Mammal", "Canine", "Feline")
+            Arrays.asList("Animal", "Pet", "Dog", "Cat", "Mammal", "Canine", "Feline",
+                    "Bird", "Fish", "Reptile", "Amphibian", "Insect")
     );
 
     public ValidationResult validate(MultipartFile file) {
@@ -68,39 +73,66 @@ public class ImageValidator {
             if (image == null) {
                 return ValidationResult.invalid("유효한 이미지 파일이 아닙니다.");
             }
-            if (image.getWidth() < MIN_WIDTH || image.getHeight() < MIN_HEIGHT) {
-                return ValidationResult.invalid("이미지 해상도가 너무 낮습니다. 최소 200×200 이상이어야 합니다.");
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            log.info("📏 이미지 해상도 확인: {}×{} (최소 요구: {}×{})",
+                    width, height, MIN_WIDTH, MIN_HEIGHT);
+
+            // 🔥 아주 관대한 해상도 체크
+            if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+                log.warn("⚠️ 해상도 낮음: {}×{}, 하지만 분석 진행", width, height);
+                // return ValidationResult.invalid() 대신 경고만 하고 통과
             }
-            return validateAnimalContent(bytes);
+
+            // 🔥 동물 감지도 선택적으로 (실패해도 무조건 통과)
+            return validateAnimalContentOptional(bytes);
+
         } catch (IOException e) {
             log.error("이미지 처리 중 오류 발생", e);
             return ValidationResult.invalid("이미지 파일을 처리하는 중 오류가 발생했습니다.");
         }
     }
 
-    private ValidationResult validateAnimalContent(byte[] bytes) {
+    /**
+     * 🔥 동물 콘텐츠 검증 (선택적 - 무조건 통과)
+     */
+    private ValidationResult validateAnimalContentOptional(byte[] bytes) {
         try {
             DetectLabelsRequest request = DetectLabelsRequest.builder()
                     .image(Image.builder().bytes(SdkBytes.fromByteArray(bytes)).build())
-                    .maxLabels(10)
-                    .minConfidence(50.0f)
+                    .maxLabels(20) // 10 → 20으로 증가
+                    .minConfidence(30.0f) // 50 → 30으로 낮춤
                     .build();
             DetectLabelsResponse response = rekognitionClient.detectLabels(request);
 
+            boolean animalDetected = false;
             for (Label label : response.labels()) {
+                log.debug("🔍 감지된 라벨: {} (신뢰도: {}%)", label.name(), label.confidence());
+
                 if (ANIMAL_LABELS.contains(label.name()) && label.confidence() >= MIN_ANIMAL_CONFIDENCE) {
-                    log.info("동물 감지됨: {}, 신뢰도: {}", label.name(), label.confidence());
-                    return ValidationResult.valid();
+                    log.info("✅ 동물 감지됨: {}, 신뢰도: {}%", label.name(), label.confidence());
+                    animalDetected = true;
+                    break;
                 }
             }
-            return ValidationResult.invalid("반려동물이 감지되지 않았습니다.");
+
+            if (!animalDetected) {
+                log.warn("⚠️ 동물이 명확히 감지되지 않았지만 분석을 진행합니다.");
+            }
+
+            // 🔥 동물이 감지되든 안 되든 무조건 통과
+            return ValidationResult.valid();
+
         } catch (Exception e) {
-            log.error("Rekognition 오류", e);
-            return ValidationResult.invalid("이미지 분석 중 오류가 발생했습니다.");
+            log.warn("⚠️ Rekognition 검증 실패, 기본 검증만 수행: {}", e.getMessage());
+            // 🔥 Rekognition 실패해도 무조건 통과
+            return ValidationResult.valid();
         }
     }
 
-    // Magic Number Signatures
+    // Magic Number Signatures (변경 없음)
     private static final byte[] JPG_SIG = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
     private static final byte[] PNG_SIG = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
     private static final byte[] BMP_SIG = new byte[]{0x42, 0x4D};

@@ -17,3 +17,9 @@ logging:
 
 server:
   forward-headers-strategy: FRAMEWORK
+
+  vision:
+    daily-limit: 3  # 기본 일일 한도
+    cleanup:
+      enabled: true
+      retention-days: 30  # 30일 이전 데이터 삭제
